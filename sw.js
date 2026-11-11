@@ -1,5 +1,5 @@
 // Service worker : interface disponible hors ligne (les données viennent de Supabase, en ligne).
-const CACHE = 'bibliorue-v3.1.0';
+const CACHE = 'bibliorue-v3.1.1';
 const SHELL = [
   './', 'index.html', 'css/style.css', 'manifest.webmanifest',
   'js/app.js', 'js/api.js', 'js/config.js', 'vendor/supabase-js-2.118.0.js', 'js/geo.js', 'js/isbn.js', 'js/overpass.js', 'js/openlibrary.js', 'js/route.js',
