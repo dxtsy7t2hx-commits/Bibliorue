@@ -1,6 +1,6 @@
 /* ==========================================================================
    Bibliorue — direction artistique « tampon / linogravure »
-   Aplats, bords légèrement irréguliers, palette restreinte (bleu cobalt,
+   Aplats vectoriels nets, palette restreinte (bleu cobalt,
    rouge brique, papier beige, encre bleu nuit), étoile comme motif de liaison.
    Polices : Lilita One (titres) et Nunito (texte), licence SIL OFL 1.1.
    ========================================================================== */
@@ -70,7 +70,7 @@ strong { font-weight: 800; }
 ::selection { background: var(--blue); color: var(--on-blue); }
 
 /* Pictogrammes (sprite inline, voir index.html) */
-.pi { width: 1.25em; height: 1.25em; flex: none; fill: currentColor; vertical-align: -.25em; filter: url(#rough); }
+.pi { width: 1.25em; height: 1.25em; flex: none; fill: currentColor; vertical-align: -.25em; }
 .tile { display: inline-grid; place-items: center; width: 2.4em; height: 2.4em; border-radius: 28%;
   background: var(--blue); color: var(--on-blue); flex: none; }
 .tile .pi { width: 62%; height: 62%; }

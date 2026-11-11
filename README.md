@@ -60,7 +60,7 @@ Les temps sont d'abord estimés à vol d'oiseau, avec une marche à 4,5 km/h, un
 L'interface s'inspire de l'**estampe** : tampon encreur et **linogravure** (gravure en relief taillée à la gouge dans du linoléum, puis encrée et pressée sur le papier).
 
 **Principes visuels**
-- **Aplats de couleur** et **bords légèrement irréguliers**. Ce relief est obtenu par un filtre SVG de déplacement (`feTurbulence` + `feDisplacementMap`), qui imite le léger flou d'une impression à la main.
+- **Aplats de couleur** aux contours **vectoriels nets** : un effet « bord irrégulier » a été essayé puis retiré, car il rendait les petits pictogrammes brouillons. Seule la grande icône de l'application le conserve.
 - **Grain de papier** discret en arrière-plan.
 - **Palette restreinte** :
 
@@ -86,14 +86,17 @@ Les deux polices sont sous licence SIL Open Font License 1.1 et sont **hébergé
 
 ## 3. Lancer l'application
 
-**Prérequis :** Node.js **22.13 ou plus récent**. C'est tout : aucune dépendance à installer, la base de données SQLite est intégrée à Node.
+> 👉 **Guide pas à pas pour débutants : [TUTORIEL.md](TUTORIEL.md)**. Il couvre l'installation de Node.js, le lancement sur votre ordinateur, la mise en ligne sur Railway, les sauvegardes et les problèmes fréquents.
+
+**Prérequis :** Node.js **22.13 ou plus récent**, idéalement la version LTS actuelle. C'est tout : aucune dépendance à installer, la base de données SQLite est intégrée à Node.
 
 ```bash
 git clone https://github.com/dxtsy7t2hx-commits/bibliorue.git
 cd bibliorue
-ADMIN_EMAILS=vous@exemple.fr npm start
+cp .env.example .env     # puis indiquez votre e-mail dans ADMIN_EMAILS
+npm start
 ```
-Ouvrez <http://localhost:8080>. Les données sont stockées dans `data/bibliorue.db`. Les variables de configuration sont décrites dans `.env.example`.
+Ouvrez <http://localhost:8080>. Les réglages sont lus dans `.env` (voir `.env.example`), et les données sont stockées dans `data/bibliorue.db`.
 
 ### Mise en ligne
 L'application a besoin d'un **serveur Node.js avec un disque persistant**. Sans disque persistant, la base de données serait effacée à chaque redémarrage. GitHub Pages ne convient donc plus : il ne sert que des fichiers fixes, sans serveur.

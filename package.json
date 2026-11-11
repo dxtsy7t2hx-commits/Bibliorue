@@ -5,7 +5,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node --disable-warning=ExperimentalWarning server/index.js",
+    "start": "node --env-file-if-exists=.env --disable-warning=ExperimentalWarning server/index.js",
     "test": "node --disable-warning=ExperimentalWarning --test tests/*.test.js"
   },
   "license": "MIT",

@@ -78,7 +78,7 @@ const osmLayer = L.layerGroup().addTo(map);
 const walkLayer = L.layerGroup().addTo(map);
 let meMarker = null;
 
-// Marqueurs : petits « tampons » carrés aux bords irréguliers, pictogramme en réserve.
+// Marqueurs : petits « tampons » carrés, pictogramme en réserve.
 function stampIcon({ fill, glyph, glyphColor, outline = false, size = 36 }) {
   const r = Math.round(size * 0.28);
   const g = Math.round(size * 0.62);
@@ -86,7 +86,7 @@ function stampIcon({ fill, glyph, glyphColor, outline = false, size = 36 }) {
   return L.divIcon({
     className: 'marker',
     html: `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true">
-      <rect x="2" y="2" width="${size - 4}" height="${size - 4}" rx="${r}" fill="${fill}" ${outline ? `stroke="${COLORS.osm}" stroke-width="2.5" stroke-dasharray="5 3"` : ''} filter="url(#rough)"/>
+      <rect x="2" y="2" width="${size - 4}" height="${size - 4}" rx="${r}" fill="${fill}" ${outline ? `stroke="${COLORS.osm}" stroke-width="2.5" stroke-dasharray="5 3"` : ''}/>
       <use href="#pi-${glyph}" x="${off}" y="${off - 1}" width="${g}" height="${g}" style="color:${glyphColor}"/></svg>`,
     iconSize: [size, size], iconAnchor: [size / 2, size / 2], popupAnchor: [0, -size / 2],
   });

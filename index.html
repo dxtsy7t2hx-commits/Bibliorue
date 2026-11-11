@@ -17,19 +17,8 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<!-- Pictogrammes Bibliorue (dessinés pour le projet) + filtres « tampon » -->
+<!-- Pictogrammes Bibliorue (dessinés pour le projet), tracés vectoriels nets -->
 <svg id="sprite" xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <defs>
-    <!-- Bord « tampon » : légère irrégularité du contour, comme une impression à la gouge -->
-    <filter id="rough" x="-10%" y="-10%" width="120%" height="120%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="n"/>
-      <feDisplacementMap in="SourceGraphic" in2="n" scale="1.1" xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
-    <filter id="rough-lg" x="-5%" y="-5%" width="110%" height="110%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" seed="3" result="n"/>
-      <feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
-  </defs>
     <symbol id="pi-star" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M12.00 0.50 L13.76 7.75 L20.13 3.87 L16.25 10.24 L23.50 12.00 L16.25 13.76 L20.13 20.13 L13.76 16.25 L12.00 23.50 L10.24 16.25 L3.87 20.13 L7.75 13.76 L0.50 12.00 L7.75 10.24 L3.87 3.87 L10.24 7.75Z"/></symbol>
     <symbol id="pi-sparkle" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M12 1.5C12.9 8.2 15.8 11.1 22.5 12 15.8 12.9 12.9 15.8 12 22.5 11.1 15.8 8.2 12.9 1.5 12 8.2 11.1 11.1 8.2 12 1.5Z"/></symbol>
     <symbol id="pi-box" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M3.5 9.6 12 2.8l8.5 6.8v1.2H3.5Z M4.6 10.8h14.8v6.6H4.6Z M6.6 12.2v4h10.8v-4Z M7.6 12.9h1.7v3.3H7.6Z M10 12.5h1.5v3.7H10Z M12.3 13.1l1.5-.4 1 3.5-1.5.4Z M15.3 12.7h1.2v3.5h-1.2Z M10.9 17.4h2.2v4.2h-2.2Z M7.5 21.2c0-.6.5-1 1-1h7c.6 0 1 .4 1 1v1.3h-9Z"/></symbol>
@@ -58,7 +47,7 @@
   <header class="topbar">
     <a class="brand" href="#map" aria-label="Bibliorue, accueil">
       <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
-        <rect x="2" y="2" width="44" height="44" rx="13" style="fill:var(--blue)" filter="url(#rough)"/>
+        <rect x="2" y="2" width="44" height="44" rx="13" style="fill:var(--blue)"/>
         <use href="#pi-box" x="9" y="8" width="30" height="30" style="color:var(--on-blue)"/>
         <use href="#pi-star" x="31" y="-1" width="17" height="17" style="color:var(--brick)"/>
       </svg>
