@@ -74,7 +74,7 @@ function showView(id) {
   const apply = () => {
     $$('.view').forEach((v) => v.classList.toggle('active', v.id === id));
     $$('.tabbar button').forEach((b) => b.classList.toggle('active', b.dataset.view === id));
-    document.body.dataset.view = id;
+    document.body.dataset.screen = id;
     if (id !== 'view-map') window.scrollTo(0, 0);
   };
   const current = $('.view.active')?.id;
@@ -938,7 +938,7 @@ $('#btn-export').addEventListener('click', async () => {
 // ---------- Démarrage ----------
 if (!isConfigured()) $('#setup-warning').hidden = false;
 if (!storage.get('bibliorue:onboarded') && !/access_token|type=/.test(location.hash)) obOpen();
-document.body.dataset.view = 'view-map';
+document.body.dataset.screen = 'view-map';
 updateHeader();
 (async () => {
   try {
