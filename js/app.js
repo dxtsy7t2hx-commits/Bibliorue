@@ -1,5 +1,5 @@
 // Interface de Bibliorue : carte communautaire, comptes, fiches, balades.
-import { api, ApiError } from './api.js';
+import { api, ApiError, isConfigured } from './api.js';
 import { fetchOsmBookcases } from './overpass.js';
 import { lookupIsbn } from './openlibrary.js';
 import { distanceMeters, formatDistance, isValidCoord } from './geo.js';
@@ -62,7 +62,7 @@ function showView(id) {
   if (id === 'view-map') setTimeout(() => map.invalidateSize(), 0);
   if (id === 'view-community') renderCommunity();
   if (id === 'view-account') renderAccount();
-  history.replaceState(null, '', `#${id.replace('view-', '')}`);
+  if (!/access_token|error_description|type=/.test(location.hash)) history.replaceState(null, '', `#${id.replace('view-', '')}`);
 }
 document.querySelectorAll('.tabbar button').forEach((b) => b.addEventListener('click', () => showView(b.dataset.view)));
 $('#btn-account').addEventListener('click', () => showView('view-account'));
@@ -237,6 +237,8 @@ function setPicking(on) {
   state.picking = on;
   $('#map').classList.toggle('picking', on);
   $('#map-hint').hidden = !on;
+  // La carte vient se placer au centre de l'écran pour qu'on puisse toucher l'emplacement.
+  if (on) setTimeout(() => $('#map').scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
 }
 $('#btn-add-box').addEventListener('click', () => {
   if (!requireLogin('ajouter une boîte')) return;
@@ -641,10 +643,52 @@ $('#login-form').addEventListener('submit', async (e) => {
 regForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   try {
-    const { user } = await api.register(Object.fromEntries(new FormData(regForm)));
+    const data = Object.fromEntries(new FormData(regForm));
+    const { user, needsConfirmation } = await api.register(data);
     regForm.reset();
+    $('#venue-fields').hidden = true;
+    if (needsConfirmation) {
+      setMsg(regForm.querySelector('.msg'), `Presque fini ! Un e-mail de confirmation vient d'être envoyé à ${data.email}. Cliquez sur le lien qu'il contient : vous serez connecté automatiquement. (Pensez à regarder dans les indésirables.)`);
+      return;
+    }
     await afterLogin(user, `Bienvenue sur Bibliorue, ${user.displayName} !`);
   } catch (err) { setMsg(regForm.querySelector('.msg'), errMsg(err), true); }
+});
+
+// Mot de passe oublié : envoi d'un lien par e-mail, puis saisie du nouveau mot de passe au retour.
+$('#btn-forgot').addEventListener('click', async () => {
+  const f = $('#login-form');
+  const email = f.email.value.trim() || prompt('Votre adresse e-mail :')?.trim();
+  if (!email) return;
+  try {
+    await api.resetPassword(email);
+    setMsg(f.querySelector('.msg'), `Si un compte existe pour ${email}, un lien de réinitialisation vient d'être envoyé.`);
+  } catch (err) { setMsg(f.querySelector('.msg'), errMsg(err), true); }
+});
+
+api.onAuthChange(async (event) => {
+  if (event === 'PASSWORD_RECOVERY') {
+    showView('view-account');
+    for (let i = 0; i < 3; i++) {
+      const pwd = prompt('Choisissez votre nouveau mot de passe (8 caractères minimum) :');
+      if (!pwd) break;
+      try { await api.updatePassword(pwd); toast('Mot de passe modifié. Vous êtes connecté.'); break; } catch (err) { alert(errMsg(err)); }
+    }
+  }
+  if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+    try {
+      const wasIn = Boolean(state.me);
+      const { user } = await api.me();
+      state.me = user;
+      updateHeader();
+      if (!wasIn && user && /type=(signup|magiclink|email)/.test(location.hash)) {
+        toast(`Adresse confirmée. Bienvenue, ${user.displayName} !`);
+        history.replaceState(null, '', location.pathname + '#account');
+        showView('view-account');
+      }
+      if ($('#view-account').classList.contains('active')) renderAccount();
+    } catch { /* hors ligne */ }
+  }
 });
 
 async function renderAccount() {
@@ -677,6 +721,7 @@ $('#btn-add-venue').addEventListener('click', () => {
 $('#btn-logout').addEventListener('click', async () => {
   await api.logout().catch(() => {});
   state.me = null;
+  setAuthTab('login');
   updateHeader();
   renderAccount();
   toast('Vous êtes déconnecté.');
@@ -717,7 +762,29 @@ $('#btn-intro-close').addEventListener('click', () => {
   try { localStorage.setItem('bibliorue:intro', 'hidden'); } catch { /* ignore */ }
 });
 
+function downloadJson(data, name, type = 'application/json') {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type }));
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+$('#btn-backup').addEventListener('click', async () => {
+  try { downloadJson(await api.backup(), `bibliorue-sauvegarde-${new Date().toISOString().slice(0, 10)}.json`); }
+  catch (err) { toast(errMsg(err)); }
+});
+
+// ---------- Données ouvertes ----------
+$('#btn-export').addEventListener('click', async () => {
+  try {
+    downloadJson(await api.exportGeojson(), `bibliorue-${new Date().toISOString().slice(0, 10)}.geojson`, 'application/geo+json');
+  } catch (err) { toast(errMsg(err)); }
+});
+
 // ---------- Démarrage ----------
+if (!isConfigured()) {
+  $('#setup-warning').hidden = false;
+}
 (async () => {
   try {
     const { user } = await api.me();

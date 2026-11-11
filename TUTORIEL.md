@@ -1,267 +1,197 @@
-# Tutoriel : lancer Bibliorue, de votre ordinateur jusqu'à Internet
+# Tutoriel : mettre Bibliorue en ligne avec Supabase (faisable entièrement depuis un iPad)
 
-Ce guide s'adresse à quelqu'un qui n'a **jamais lancé d'application web**. Il y a deux étapes, dans cet ordre :
+Tout se fait dans **Safari**, sur trois sites : **GitHub** (où est le code), **Supabase** (où seront les données) et votre future adresse **GitHub Pages** (où sera l'application). Il n'y a rien à installer.
 
-| Étape | À quoi ça sert | Durée | Coût |
-|---|---|---|---|
-| **A. Essayer sur votre ordinateur** | Voir l'application tourner, la tester, sans risque. Vous seul y avez accès. | 15 min | Gratuit |
-| **B. Mettre en ligne** | Obtenir une adresse web publique (`https://…`) que tout le monde peut ouvrir, y compris sur téléphone. | 20 min | Gratuit pour un petit essai, environ 5 $/mois ensuite (voir B.7) |
+**Durée :** 30 à 45 minutes. **Coût :** 0 € (offres gratuites de GitHub et Supabase).
 
-> **Pourquoi un serveur ?** Bibliorue est une carte *partagée* : quand Camille ajoute une boîte, Léo doit la voir. Il faut donc un ordinateur allumé en permanence (un **serveur**) qui garde les données communes dans une **base de données** (ici un seul fichier, `bibliorue.db`). À l'étape A, ce serveur est votre propre ordinateur. À l'étape B, c'est un ordinateur loué chez un **hébergeur**.
+### Comment les pièces s'emboîtent
+```
+  Téléphone / iPad des promeneurs
+            │  ouvre https://dxtsy7t2hx-commits.github.io/Bibliorue/
+            ▼
+  GitHub Pages ── sert les pages de l'application (HTML, CSS, JavaScript, pictogrammes)
+            │  l'application demande / envoie les données
+            ▼
+  Supabase ── comptes (e-mail + mot de passe), base de données PostgreSQL, règles de sécurité
+```
 
----
-
-## Vous êtes sur iPad (ou sans ordinateur) ?
-
-L'iPad ne permet pas d'installer Node.js ni d'ouvrir un vrai terminal : **sautez l'étape A**. Tout le reste se fait dans Safari, car GitHub et Railway sont des sites web.
-
-1. **Étape 0** sur github.com : fusionnez la branche dans `main`. Ce sont des boutons, aucune commande.
-2. **Étape B** sur railway.com : mettez Bibliorue en ligne. L'offre gratuite suffit pour essayer, et l'adresse obtenue sert alors de version de test.
-
-Adaptations pour l'écran tactile :
-- **Pour ajouter le volume (B.4)** : il n'y a pas de clic droit. Utilisez le bouton de création du canevas (**+ Create** ou **+ New**, en haut), puis choisissez **Volume**. Le raccourci `Cmd + K` marche aussi si un clavier est branché.
-- **Pour ouvrir un menu (⋮, Redeploy…)** : touchez l'icône ; un appui long fait office de clic droit.
-- **Pour installer l'application une fois en ligne** : dans Safari, bouton Partager, puis **Sur l'écran d'accueil**.
-
-> La seule chose impossible sur iPad, c'est de faire tourner Bibliorue *en local*. Une version en ligne sur Railway la remplace très bien pour vos essais. Les éventuelles erreurs se lisent dans **Deployments**, puis **View logs**.
+> **Petit lexique**
+> - **Dépôt** : le dossier du projet sur GitHub.
+> - **Branche** : une version parallèle du code. `main` est la version officielle.
+> - **SQL** : le langage qui parle aux bases de données.
+> - **Clé publique** (*publishable key*) : un identifiant qui permet à l'application de joindre votre projet Supabase. Elle est faite pour être visible : ce sont les règles de la base qui protègent les données, pas le secret de la clé (Supabase, s.d.-a).
 
 ---
 
-## Petit lexique
+## Étape 1 : rassembler le code sur `main` (GitHub)
 
-- **Terminal** : fenêtre où l'on tape des commandes au lieu de cliquer. Sur Mac, l'application s'appelle *Terminal* ; sur Windows, *Terminal* ou *PowerShell*.
-- **Commande** : ligne de texte tapée dans le terminal, validée avec la touche Entrée. Dans ce guide, elles sont dans des blocs gris comme celui-ci :
-  ```
-  node --version
-  ```
-- **Node.js** : le moteur qui fait tourner le serveur de Bibliorue (le serveur est écrit en JavaScript).
-- **Dépôt (GitHub)** : le dossier en ligne qui contient tout le code, avec son historique.
-- **Branche** : une version parallèle du code. Tout le travail est sur la branche `claude/application-complete-1cy33u`. La version « officielle » s'appelle `main`.
-- **Variable d'environnement** : un réglage passé à l'application sans toucher au code, par exemple l'e-mail du modérateur.
+Le code est sur une branche de travail, `claude/application-complete-1cy33u`. GitHub Pages publiera la branche `main` : il faut donc d'abord fusionner.
 
----
+1. Dans Safari, ouvrez <https://github.com/dxtsy7t2hx-commits/Bibliorue> (connecté à votre compte).
+2. Touchez **Pull requests**, puis **New pull request**.
+3. Réglez les deux menus : **base: `main`** ← **compare: `claude/application-complete-1cy33u`**.
+4. Touchez **Create pull request** (deux fois : la seconde valide le titre).
+5. Attendez que la coche verte des tests apparaisse, puis touchez **Merge pull request** et **Confirm merge**.
 
-## Étape 0 : rassembler le code sur la branche `main` (recommandé)
-
-Pour l'instant, le code est sur une branche de travail. Le plus simple est de le **fusionner** dans `main` : c'est la version que les hébergeurs prennent par défaut.
-
-1. Ouvrez <https://github.com/dxtsy7t2hx-commits/bibliorue> en étant connecté à GitHub.
-2. Un bandeau jaune propose *« claude/application-complete-1cy33u had recent pushes — Compare & pull request »*. Cliquez sur **Compare & pull request**.
-   - Si le bandeau n'apparaît pas : onglet **Pull requests**, puis **New pull request**. Choisissez `base: main` et `compare: claude/application-complete-1cy33u`.
-3. Cliquez sur **Create pull request**, puis sur **Merge pull request** et **Confirm merge**.
-
-> Une **pull request** (« demande de fusion ») présente les changements d'une branche avant de les intégrer à `main`. Vous pouvez aussi me demander de la créer pour vous.
+> Vous pouvez aussi me demander de créer cette *pull request* (« demande de fusion »). Il ne vous restera alors que l'étape 5.
 
 ---
 
-## Étape A : essayer Bibliorue sur votre ordinateur
+## Étape 2 : créer le projet Supabase
 
-### A.1 Installer Node.js (une seule fois)
-1. Allez sur <https://nodejs.org>.
-2. Téléchargez la version marquée **LTS** (*Long Term Support*, la version stable maintenue plusieurs années).
-3. Installez-la comme n'importe quel logiciel : double-clic, puis Suivant, Suivant, Terminer.
-4. Vérifiez l'installation. Ouvrez un terminal :
-   - **Mac** : touches `Cmd + Espace`, tapez « Terminal », puis Entrée ;
-   - **Windows** : touche Windows, tapez « Terminal », puis Entrée.
+1. Allez sur <https://supabase.com/dashboard> et touchez **New project**.
+2. Remplissez :
+   - **Name** : `bibliorue` ;
+   - **Database Password** : touchez **Generate a password**, puis **notez-le** dans un endroit sûr (gestionnaire de mots de passe de l'iPad). L'application n'en a pas besoin, mais vous pourriez en avoir besoin un jour ;
+   - **Region** : choisissez une région **européenne** (Paris ou Francfort, par exemple). Vos données restent ainsi dans l'Union européenne, ce qui simplifie le respect du RGPD ;
+   - laissez les autres options par défaut, en particulier la **Data API**, qui doit rester activée : c'est elle qu'utilise l'application.
+3. Touchez **Create new project** et patientez une à deux minutes.
 
-   Tapez ensuite :
+---
+
+## Étape 3 : installer la base de données (copier-coller un script)
+
+Le script crée les tables (profils, boîtes, livres, activité, signalements), les règles de sécurité et toutes les fonctions de l'application. Il ne supprime jamais rien : on peut le relancer sans danger.
+
+1. **Copier le script.** Dans un nouvel onglet, ouvrez le fichier
+   <https://github.com/dxtsy7t2hx-commits/Bibliorue/blob/main/supabase/migrations/20261111120000_bibliorue.sql>.
+   Touchez l'icône **Copy raw file** (deux carrés superposés, au-dessus du code, à droite).
+2. **Le coller.** Dans Supabase, menu de gauche, ouvrez **SQL Editor**, puis **New query**. Touchez la zone de texte, puis **Coller**.
+3. Touchez **Run** (en bas à droite).
+4. Le résultat attendu est **« Success. No rows returned »**.
+   - Supabase peut afficher un avertissement à propos d'opérations « destructives » : il réagit au mot `drop` des lignes `drop policy if exists`, qui ne font que remplacer une règle par sa nouvelle version. Confirmez.
+5. Vérification : menu **Table Editor**. Vous devez voir `books`, `boxes`, `events`, `profiles` et `reports`.
+
+> **Variante automatique (facultative).** Votre projet Supabase est relié à GitHub. Dans **Project Settings**, puis **Integrations**, puis **GitHub**, vous pouvez indiquer comme *Working directory* `.` et activer **Deploy to production**. Les futurs scripts du dossier `supabase/migrations` s'appliqueront alors tout seuls à chaque fusion sur `main` (Supabase, s.d.-e). Le copier-coller reste la voie la plus simple et la plus sûre pour cette première installation.
+
+---
+
+## Étape 4 : les réglages de connexion (Authentication)
+
+### 4a. Inscription sans e-mail de confirmation (pour démarrer)
+Le service d'e-mail intégré à Supabase n'écrit qu'aux **membres de votre équipe Supabase**, et 2 e-mails par heure au maximum (Supabase, s.d.-c). Vos futurs membres ne recevraient donc **pas** l'e-mail de confirmation, et ne pourraient jamais se connecter.
+
+Pour démarrer :
+1. Menu **Authentication**, puis **Sign In / Providers** (ou **Providers**), puis **Email**.
+2. **Désactivez « Confirm email »**, puis **Save**.
+
+Les inscriptions fonctionnent alors immédiatement. La confirmation et le « mot de passe oublié » pour tous se rebrancheront à l'étape 9.
+
+### 4b. L'adresse du site
+1. Menu **Authentication**, puis **URL Configuration** (Supabase, s.d.-f).
+2. **Site URL** :
    ```
-   node --version
+   https://dxtsy7t2hx-commits.github.io/Bibliorue/
    ```
-   Il doit s'afficher un numéro comme `v24.11.0`. **Il faut au moins `v22.13`** : Bibliorue utilise la base de données SQLite intégrée à Node.js, qui n'existe pas dans les versions plus anciennes.
+3. Dans **Redirect URLs**, touchez **Add URL** et ajoutez :
+   ```
+   https://dxtsy7t2hx-commits.github.io/Bibliorue/**
+   ```
+4. **Save**.
 
-### A.2 Télécharger le code
-1. Sur la page GitHub du dépôt, cliquez sur le bouton vert **Code**, puis **Download ZIP**.
-   - Si vous n'avez pas fait l'étape 0, choisissez d'abord la branche `claude/application-complete-1cy33u` dans le menu des branches (en haut à gauche, il indique `main`).
-2. Décompressez le fichier ZIP, par exemple dans *Documents*. Vous obtenez un dossier `bibliorue-main` (ou un nom proche).
+Ces adresses indiquent à Supabase où renvoyer les gens après un clic dans un e-mail (confirmation, nouveau mot de passe).
 
-### A.3 Ouvrir un terminal « dans » ce dossier
-Les commandes doivent s'exécuter depuis le dossier de Bibliorue.
+---
 
-- **Mac** : dans le Terminal, tapez `cd ` (avec un espace après), **glissez le dossier** depuis le Finder dans la fenêtre du Terminal, puis appuyez sur Entrée.
-- **Windows** : ouvrez le dossier dans l'Explorateur, faites un clic droit dans un espace vide, puis **Ouvrir dans le Terminal**.
+## Étape 5 : relier l'application à votre projet
 
-Pour vérifier, tapez `ls` (Mac) ou `dir` (Windows). Vous devez voir `index.html`, `server`, `package.json`, etc.
+1. Dans Supabase, touchez le bouton **Connect**, en haut de la page du projet (Supabase, s.d.-a). Notez :
+   - l'**URL du projet**, de la forme `https://abcdefghijkl.supabase.co` ;
+   - la **clé publique** (*Publishable key*), qui commence par `sb_publishable_…`.
 
-### A.4 Créer votre fichier de réglages `.env`
-Le fichier `.env.example` est un modèle. Copiez-le sous le nom `.env` :
+   On les retrouve aussi dans **Project Settings**, puis **API Keys**.
+2. **Option A, la plus simple : envoyez-moi ces deux valeurs** dans la conversation. Elles sont publiques par conception. Je les écris dans `js/config.js` et je mets en ligne.
+3. **Option B, vous-même sur GitHub :**
+   1. Ouvrez <https://github.com/dxtsy7t2hx-commits/Bibliorue/blob/main/js/config.js>.
+   2. Touchez l'icône **crayon** (*Edit this file*).
+   3. Remplacez `COLLEZ_ICI_L_URL_DU_PROJET` par l'URL, et `COLLEZ_ICI_LA_CLE_PUBLISHABLE` par la clé. Gardez les apostrophes `'…'` autour.
+   4. Touchez **Commit changes…**, puis encore **Commit changes**.
 
-- **Mac** :
-  ```
-  cp .env.example .env
-  ```
-- **Windows** :
-  ```
-  copy .env.example .env
-  ```
+> ⚠️ Ne mettez **jamais** dans ce fichier la clé **secrète** (`sb_secret_…` ou l'ancienne `service_role`). Elle donne tous les droits sur la base et ne doit jamais quitter Supabase.
 
-Ouvrez ensuite `.env` avec un éditeur de texte (TextEdit, Bloc-notes…). Complétez la ligne des modérateurs avec **votre** e-mail :
-```
-ADMIN_EMAILS=votre.adresse@exemple.fr
-```
+---
 
-> Sur Mac, les fichiers dont le nom commence par un point sont cachés dans le Finder. Pour les afficher : `Cmd + Maj + .`.
->
-> Le fichier `.env` reste sur votre ordinateur : il est exclu de GitHub (via `.gitignore`).
+## Étape 6 : publier avec GitHub Pages
 
-### A.5 Lancer
-```
-npm start
-```
-Le message suivant doit apparaître :
-```
-Bibliorue écoute sur http://localhost:8080
-```
-Ouvrez <http://localhost:8080> dans votre navigateur. `localhost` signifie « cet ordinateur-ci ».
+1. Sur la page du dépôt GitHub, touchez **Settings** (dans le menu ⋯ sur petit écran), puis **Pages**.
+2. Sous **Build and deployment**, puis **Source**, choisissez **Deploy from a branch**.
+3. **Branch** : `main`, dossier **`/ (root)`**, puis **Save**.
+4. Après une ou deux minutes, l'adresse s'affiche en haut de la page :
+   **https://dxtsy7t2hx-commits.github.io/Bibliorue/**
 
-**Laissez le terminal ouvert** : si vous le fermez, le serveur s'arrête. Pour l'arrêter volontairement, appuyez sur `Ctrl + C` dans le terminal.
+Ouvrez-la. Si un bandeau rouge « Bibliorue n'est pas encore relié à Supabase » apparaît, l'étape 5 n'est pas terminée.
 
-### A.6 Premiers pas
-1. Cliquez sur **Connexion**, puis **Créer un compte**, **avec l'e-mail mis dans `ADMIN_EMAILS`**. Ce compte sera modérateur : il voit les signalements et peut corriger ou supprimer n'importe quelle boîte.
-2. Cliquez sur **Ajouter une boîte**, puis touchez la carte : votre première bibliothèque de rue apparaît en bleu.
-3. Pour tester un **lieu culturel** : créez un second compte de type « Lieu culturel », dans une fenêtre de navigation privée pour ne pas être déconnecté du premier. Son lieu apparaîtra en rouge brique.
-4. Essayez l'onglet **Balade**.
+---
 
-Les données sont enregistrées dans `data/bibliorue.db`. Pour **tout remettre à zéro**, arrêtez le serveur (`Ctrl + C`), supprimez le dossier `data`, puis relancez `npm start`.
+## Étape 7 : votre compte, puis devenir modérateur
 
-### A.7 (Facultatif) Lancer les tests automatiques
-```
-npm test
-```
-Les 28 tests doivent afficher `pass 28` et `fail 0`. Ils vérifient les comptes, les droits, les doublons, la balade, etc.
+1. Sur le site, touchez **Connexion**, puis **Créer un compte**. Choisissez **Particulier**, ou **Lieu culturel** si vous représentez un lieu.
+2. Dans Supabase, retournez dans **SQL Editor**, puis **New query**. Collez la ligne suivante en mettant **votre** e-mail, puis **Run** :
+   ```sql
+   select public.make_admin('votre.adresse@exemple.fr');
+   ```
+   Réponse attendue : `OK : … est maintenant modérateur.`
+3. Rechargez le site. Dans votre compte apparaît la section **Modération**, avec les signalements et le bouton de **sauvegarde**.
 
-### A.8 Problèmes fréquents
+---
 
-| Message | Cause | Solution |
+## Étape 8 : installer l'application sur l'iPad (et les téléphones)
+
+Dans Safari, sur le site, touchez le bouton **Partager**, puis **Sur l'écran d'accueil**. Bibliorue s'ouvre ensuite en plein écran, comme une application.
+
+**Premiers essais :**
+- placer une boîte (bouton **Ajouter une boîte**, puis toucher la carte) ;
+- déposer un livre ;
+- lancer une **Balade** ;
+- utiliser le bouton **Boîtes OSM** pour importer les boîtes déjà recensées par OpenStreetMap dans votre ville.
+
+---
+
+## Étape 9 (avant d'ouvrir au public) : des e-mails pour tout le monde
+
+Pour réactiver la confirmation des adresses et le **mot de passe oublié**, branchez un service d'envoi d'e-mails (SMTP) :
+
+1. Créez un compte chez un service d'envoi, par exemple **Brevo** (entreprise française, offre gratuite) ou Resend. Le plus fiable est d'utiliser un nom de domaine à vous (par exemple `bibliorue.fr`) pour l'adresse d'expédition.
+2. Dans Supabase : **Authentication**, puis **Emails**, puis **SMTP Settings**, puis **Enable custom SMTP**. Recopiez l'hôte, le port, l'identifiant et le mot de passe fournis par le service.
+3. Réactivez **Confirm email** (étape 4a).
+
+Je peux vous guider pas à pas le moment venu.
+
+---
+
+## Au quotidien
+
+| Besoin | Où |
+|---|---|
+| Voir les signalements, sauvegarder | Site, puis votre compte, puis **Modération** |
+| Sauvegarde complète (JSON) | Bouton **Télécharger une sauvegarde complète**. L'offre gratuite de Supabase ne fait pas de sauvegarde automatique (Supabase, s.d.-d) : faites-en une **chaque semaine** et rangez-la dans Fichiers ou iCloud. |
+| Projet « en pause » | Un projet gratuit est mis en pause après **7 jours sans activité** (Supabase, s.d.-b). Les données sont conservées. Dans le tableau de bord Supabase, touchez **Restore project**. |
+| Corriger / supprimer une boîte | Ouvrez sa fiche : en tant que modérateur, vous voyez **Modifier** et **Supprimer** partout. |
+| Nommer un autre modérateur | Étape 7.2, avec son e-mail. |
+
+## Si quelque chose ne marche pas
+
+| Symptôme | Cause probable | Solution |
 |---|---|---|
-| `node` / `npm` *n'est pas reconnu* ou *command not found* | Node.js n'est pas installé, ou le terminal a été ouvert avant l'installation. | Fermez et rouvrez le terminal ; sinon, refaites A.1. |
-| `No such built-in module: node:sqlite` ou `bad option: --env-file-if-exists` | Node.js est trop ancien. | Installez la version LTS actuelle (A.1). |
-| `EADDRINUSE` | Le port 8080 est déjà utilisé par un autre programme, ou par un Bibliorue déjà lancé. | Fermez l'autre terminal, ou mettez `PORT=8081` dans `.env` puis ouvrez `http://localhost:8081`. |
-| `ENOENT … package.json` | Le terminal n'est pas dans le dossier de Bibliorue. | Refaites A.3. |
-| « Me localiser » ne fait rien | Le navigateur bloque la position. | Autorisez la localisation pour `localhost` (icône à gauche de l'adresse). |
-
-> **Et sur mon téléphone ?** En local, le téléphone ne peut pas utiliser la géolocalisation ni la caméra : les navigateurs exigent une connexion chiffrée HTTPS, sauf pour `localhost`. Pour tester sur téléphone, passez à l'étape B.
-
----
-
-## Étape B : mettre Bibliorue en ligne avec Railway
-
-**Railway** est un hébergeur qui lit le code directement depuis GitHub, le construit et le met en ligne avec une adresse HTTPS. Je le recommande pour trois raisons :
-- il se pilote entièrement à la souris ;
-- il comprend le fichier `Dockerfile` de Bibliorue (la « recette » qui décrit comment installer l'application) ;
-- il propose des **volumes**, c'est-à-dire des disques durables. Sans volume, la base de données serait effacée à chaque mise à jour.
-
-> Les intitulés des boutons de Railway peuvent changer légèrement avec le temps. En cas de doute, la documentation officielle est sur <https://docs.railway.com>.
-
-### B.1 Créer un compte
-Allez sur <https://railway.com> et inscrivez-vous **avec votre compte GitHub** : cela relie les deux services. Autorisez Railway à accéder au dépôt `bibliorue`.
-
-### B.2 Créer le projet depuis GitHub
-1. Cliquez sur **New Project**, puis **GitHub Repository** (ou *Deploy from GitHub repo*).
-2. Choisissez `bibliorue`.
-3. Choisissez **Add variables** plutôt que *Deploy Now* : il faut d'abord régler l'application.
-
-Railway détecte seul le `Dockerfile`. Il doit être à la racine du dépôt, avec un D majuscule, ce qui est le cas (Railway, s.d.-b).
-
-### B.3 Renseigner les variables
-Dans l'onglet **Variables** du service, ajoutez :
-
-| Nom | Valeur | Pourquoi |
-|---|---|---|
-| `ADMIN_EMAILS` | `votre.adresse@exemple.fr` | Votre compte sera modérateur. |
-| `TRUST_PROXY` | `1` | Railway place un intermédiaire (*proxy*) devant l'application. Ce réglage permet de lire la vraie adresse des visiteurs, utile pour limiter les tentatives de connexion abusives. |
-| `RAILWAY_RUN_UID` | `0` | Les volumes Railway appartiennent à l'administrateur du système (*root*), alors que Bibliorue s'exécute par sécurité avec un utilisateur restreint. Cette variable lui donne le droit d'écrire sur le volume (Railway, s.d.-c). |
-
-N'ajoutez **pas** `PORT` : Railway le fournit lui-même. `DATABASE_PATH` est déjà réglé sur `/data/bibliorue.db` dans le `Dockerfile`.
-
-**Si vous n'avez pas fusionné dans `main` (étape 0)** : dans les réglages du service (**Settings**), choisissez `claude/application-complete-1cy33u` comme branche de déclenchement (*trigger branch*) (Railway, s.d.-e).
-
-### B.4 Ajouter le volume (le disque qui garde les données)
-1. Sur le canevas du projet (la zone où apparaît la carte du service), faites un **clic droit**, puis **Volume**. Vous pouvez aussi passer par la palette de commandes : `Cmd + K` sur Mac, `Ctrl + K` sur Windows.
-2. Reliez-le au service Bibliorue.
-3. Comme **chemin de montage** (*mount path*), indiquez exactement :
-   ```
-   /data
-   ```
-
-> N'utilisez pas `/app` : c'est là que se trouve le code de l'application. Un volume monté à cet endroit le masquerait et empêcherait le démarrage.
-
-### B.5 Déployer et obtenir l'adresse
-1. Cliquez sur **Deploy** (en haut du canevas). La construction prend une à deux minutes.
-2. Dans l'onglet **Deployments**, puis **View logs**, la ligne `Bibliorue écoute sur http://localhost:8080` indique que tout va bien. Ce texte parle de `localhost` parce qu'il est écrit depuis l'intérieur du serveur ; c'est normal.
-3. Dans **Settings**, puis **Networking**, cliquez sur **Generate Domain**. Si Railway demande un port, indiquez celui des journaux (en principe `8080`).
-4. Vous obtenez une adresse du type `https://bibliorue-production.up.railway.app`. **C'est celle à partager.** Le HTTPS est fourni automatiquement.
-
-### B.6 Vérifier
-1. Ouvrez l'adresse, créez votre compte avec l'e-mail de `ADMIN_EMAILS`, puis ajoutez une boîte.
-2. **Redéployez** (dans *Deployments*, menu ⋮, puis *Redeploy*) et vérifiez que la boîte est toujours là. Si elle a disparu, le volume n'est pas monté sur `/data` : revoyez B.4.
-3. Sur votre téléphone, ouvrez l'adresse et installez l'application :
-   - **Android** : menu ⋮, puis **Installer l'application** ;
-   - **iPhone** : bouton Partager, puis **Sur l'écran d'accueil**.
-
-### B.7 Combien ça coûte ?
-D'après la page des offres de Railway (Railway, s.d.-a), consultée le 11 novembre 2026. **Vérifiez-la avant de vous engager, car les prix évoluent.**
-
-| Offre | Prix | Crédit d'utilisation inclus | Taille maximale d'un volume |
-|---|---|---|---|
-| Free | 0 $ | 1 $ par mois | 0,5 Go |
-| Trial (essai) | — | 5 $, une seule fois | 0,5 Go |
-| Hobby | 5 $ par mois | 5 $ par mois | 5 Go |
-| Pro | 20 $ par mois | 20 $ par mois | jusqu'à 1 To |
-
-Le « crédit d'utilisation » couvre le temps de calcul et la mémoire réellement consommés. Ces offres sont libellées en dollars américains.
-
-**Ordre de grandeur pour Bibliorue :**
-- 0,5 Go suffit pour **des dizaines de milliers de boîtes et de livres**, car seuls des textes sont stockés et la base fait quelques Mo ;
-- l'offre **Hobby** est la plus adaptée à un service public qui doit rester allumé.
-
-### B.8 Mettre à jour l'application
-Chaque nouvelle version poussée sur la branche suivie par Railway (`main` en principe) est **reconstruite et remise en ligne automatiquement**. Pour cela, il suffit que votre compte GitHub soit relié au projet (Railway, s.d.-e). Les données du volume sont conservées.
-
-### B.9 Sauvegarder les données
-Les services dotés d'un volume peuvent être sauvegardés à la main ou automatiquement (Railway, s.d.-c). Ouvrez le volume, onglet **Backups**, et activez une sauvegarde régulière, par exemple quotidienne. **Faites-le avant d'annoncer le site.**
-
-### B.10 (Facultatif) Votre propre nom de domaine
-Pour une adresse comme `bibliorue.fr`, achetez le nom chez un registraire (OVHcloud, Gandi…). Ajoutez-le ensuite dans **Settings**, puis **Networking**, puis **Custom Domain**, et suivez les instructions DNS affichées.
-
-> Le **DNS** est l'annuaire d'Internet : il associe un nom lisible à l'adresse technique du serveur.
-
----
-
-## Autres façons d'héberger
-
-- **Un serveur loué (VPS)**, chez OVHcloud, Scaleway, Hetzner… Avec Docker installé, deux commandes suffisent :
-  ```
-  docker build -t bibliorue .
-  docker run -d -p 8080:8080 -v bibliorue-data:/data -e ADMIN_EMAILS=vous@exemple.fr -e TRUST_PROXY=1 bibliorue
-  ```
-  Il faut ensuite placer devant un serveur HTTPS, comme Caddy ou Nginx. C'est plus technique, mais aussi plus économique et sous votre contrôle total.
-- **Fly.io** ou **Render** fonctionnent aussi, à condition d'ajouter un disque persistant. Chez Render, le disque n'est proposé que sur les offres payantes.
-
----
-
-## Avant d'annoncer le site au public : la liste
-
-- [ ] Sauvegardes automatiques activées (B.9).
-- [ ] Au moins un modérateur (`ADMIN_EMAILS`) qui s'est inscrit.
-- [ ] **Mentions légales** et **politique de confidentialité** publiées. Le site conserve des e-mails, donc le RGPD (règlement général sur la protection des données) s'applique. La CNIL, l'autorité française de protection des données, propose un guide de démarrage (CNIL, s.d.).
-- [ ] Quelques boîtes déjà placées dans votre ville, pour que les premiers visiteurs ne trouvent pas une carte vide. Le bouton **Boîtes OSM** permet d'importer celles déjà recensées par OpenStreetMap.
-- [ ] Prévoir, dans une prochaine version, la récupération de mot de passe : elle demande un service d'envoi d'e-mails.
+| Bandeau rouge « pas encore relié à Supabase » | `js/config.js` n'est pas rempli. | Étape 5. |
+| « Connexion impossible » partout | URL ou clé mal recopiée, ou projet en pause. | Revérifiez l'étape 5 ; regardez si le projet est en pause. |
+| « Could not find the function… » | Le script de l'étape 3 n'a pas été exécuté sur **ce** projet. | Refaites l'étape 3. |
+| Inscription « réussie » mais connexion impossible (« Confirmez d'abord votre adresse ») | « Confirm email » est encore activé sans SMTP. | Étape 4a. |
+| La page GitHub Pages affiche « 404 » | Pages n'est pas activé, ou le code n'est pas sur `main`. | Étapes 1 et 6. Attendez deux minutes après l'activation. |
+| Le site n'affiche pas les dernières modifications | Ancienne version gardée en mémoire. | Fermez l'onglet, rouvrez-le ; au besoin, rechargez deux fois. |
 
 ---
 
 ## Sources
 
-CNIL. (s.d.). *RGPD : par où commencer*. Consulté le 11 novembre 2026, à l'adresse https://www.cnil.fr/fr/rgpd-par-ou-commencer
+Supabase. (s.d.-a). *API keys*. Supabase Docs. Consulté le 11 novembre 2026, à l'adresse https://supabase.com/docs/guides/api/api-keys
 
-OpenJS Foundation. (s.d.). *Node.js releases*. Consulté le 11 novembre 2026, à l'adresse https://nodejs.org/en/about/previous-releases
+Supabase. (s.d.-b). *Pricing*. Consulté le 11 novembre 2026, à l'adresse https://supabase.com/pricing
 
-Railway. (s.d.-a). *Pricing plans*. Railway Docs. Consulté le 11 novembre 2026, à l'adresse https://docs.railway.com/pricing/plans
+Supabase. (s.d.-c). *Send emails with custom SMTP*. Supabase Docs. Consulté le 11 novembre 2026, à l'adresse https://supabase.com/docs/guides/auth/auth-smtp
 
-Railway. (s.d.-b). *Dockerfiles*. Railway Docs. Consulté le 11 novembre 2026, à l'adresse https://docs.railway.com/builds/dockerfiles
+Supabase. (s.d.-d). *Database backups*. Supabase Docs. Consulté le 11 novembre 2026, à l'adresse https://supabase.com/docs/guides/platform/backups
 
-Railway. (s.d.-c). *Volumes*. Railway Docs. Consulté le 11 novembre 2026, à l'adresse https://docs.railway.com/volumes
+Supabase. (s.d.-e). *GitHub integration*. Supabase Docs. Consulté le 11 novembre 2026, à l'adresse https://supabase.com/docs/guides/deployment/branching/github-integration
 
-Railway. (s.d.-d). *Quick start*. Railway Docs. Consulté le 11 novembre 2026, à l'adresse https://docs.railway.com/quick-start
-
-Railway. (s.d.-e). *GitHub autodeploys*. Railway Docs. Consulté le 11 novembre 2026, à l'adresse https://docs.railway.com/deployments/github-autodeploys
+Supabase. (s.d.-f). *Redirect URLs*. Supabase Docs. Consulté le 11 novembre 2026, à l'adresse https://supabase.com/docs/guides/auth/redirect-urls

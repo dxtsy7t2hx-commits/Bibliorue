@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <link rel="stylesheet" href="css/style.css">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://overpass-api.de https://overpass.private.coffee https://overpass.kumi.systems https://openlibrary.org https://covers.openlibrary.org https://routing.openstreetmap.de https://unpkg.com; base-uri 'self'; form-action 'self'">
 </head>
 <body>
 <!-- Pictogrammes Bibliorue (dessinés pour le projet), tracés vectoriels nets -->
@@ -60,6 +61,7 @@
   </header>
 
   <main>
+    <p id="setup-warning" class="hint" hidden>Bibliorue n'est pas encore relié à Supabase : complétez <code>js/config.js</code> (voir TUTORIEL.md, étape 4).</p>
     <!-- CARTE -->
     <section id="view-map" class="view active" aria-label="Carte">
       <div class="intro" id="intro">
@@ -140,7 +142,7 @@
       <div class="stars-sep" aria-hidden="true"><span></span><span></span><span></span></div>
       <h3>À propos</h3>
       <p>Une <strong>bibliothèque de rue</strong> (ou « boîte à livres ») est un meuble en libre accès dans l'espace public : on y dépose et on y prend des livres gratuitement. Bibliorue est une carte <strong>tenue par ses utilisateurs</strong>. Tout le monde peut la consulter ; il faut un compte pour ajouter une boîte ou un livre. Les <strong>lieux culturels</strong> (bibliothèques, librairies, cafés-livres, associations…) peuvent s'inscrire comme tels et apparaissent en rouge brique.</p>
-      <p class="small">Fond de carte et boîtes « OSM » © contributeurs OpenStreetMap (ODbL). Fiches livres : Open Library. Itinéraires : OSRM / FOSSGIS. Polices Lilita One et Nunito (SIL OFL). <a href="/api/export.geojson" download="bibliorue.geojson">Télécharger la carte (GeoJSON, données ouvertes)</a></p>
+      <p class="small">Fond de carte et boîtes « OSM » © contributeurs OpenStreetMap (ODbL). Fiches livres : Open Library. Itinéraires : OSRM / FOSSGIS. Polices Lilita One et Nunito (SIL OFL). <button id="btn-export" type="button" class="small"><svg class="pi"><use href="#pi-import"/></svg>Télécharger la carte (GeoJSON, données ouvertes)</button></p>
     </section>
 
     <!-- COMPTE -->
@@ -156,7 +158,10 @@
           <label class="field"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
           <label class="field"><span>Mot de passe</span><input name="password" type="password" autocomplete="current-password" required></label>
           <p class="msg" role="status"></p>
-          <button class="primary" type="submit"><svg class="pi"><use href="#pi-door"/></svg>Se connecter</button>
+          <div class="row">
+            <button class="primary" type="submit"><svg class="pi"><use href="#pi-door"/></svg>Se connecter</button>
+            <button class="ghost small" id="btn-forgot" type="button">Mot de passe oublié ?</button>
+          </div>
         </form>
         <form id="register-form" class="auth-form" hidden>
           <fieldset class="types">
@@ -181,7 +186,7 @@
                 <option value="ecole">École / université</option>
                 <option value="autre">Autre</option>
               </select></label>
-            <label class="field"><span>Site web (facultatif)</span><input name="website" type="url" inputmode="url" placeholder="https://…"></label>
+            <label class="field"><span>Site web (facultatif)</span><input name="website" type="text" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="300" placeholder="monsite.fr"></label>
           </div>
           <label class="field"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
           <label class="field"><span>Mot de passe (8 caractères minimum)</span><input name="password" type="password" minlength="8" autocomplete="new-password" required></label>
@@ -207,6 +212,9 @@
         <section id="admin" hidden>
           <h3>Modération : signalements</h3>
           <ul id="reports" class="events"></ul>
+          <h3>Sauvegarde</h3>
+          <p class="small">L'offre gratuite de Supabase ne fait pas de sauvegarde automatique : téléchargez régulièrement une copie complète (sans e-mails ni mots de passe).</p>
+          <button id="btn-backup" type="button"><svg class="pi"><use href="#pi-import"/></svg>Télécharger une sauvegarde complète</button>
         </section>
       </div>
     </section>
@@ -281,6 +289,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="vendor/supabase-js-2.118.0.js"></script>
   <script type="module" src="js/app.js"></script>
 </body>
 </html>

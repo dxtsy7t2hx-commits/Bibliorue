@@ -41,8 +41,8 @@ Bibliorue se branche aussi sur OpenStreetMap : les boîtes déjà recensées y a
 | 🚶 **Balade** | On choisit son temps disponible (30 min à 4 h), une boucle ou un aller simple, et si l'on inclut les lieux culturels. Bibliorue choisit les étapes, les ordonne et trace l'itinéraire piéton réel. La balade s'ouvre ensuite dans une application GPS. |
 | 🔎 **Recherche** | Un livre précis, dans toutes les boîtes, trié par distance. |
 | 🤝 **Communauté** | Statistiques et fil des dernières contributions. |
-| ⚑ **Modération** | Tout membre peut signaler un contenu. Les modérateurs (variable `ADMIN_EMAILS`) voient les signalements et peuvent corriger ou supprimer n'importe quelle boîte. |
-| 📤 **Données ouvertes** | Export public de la carte en GeoJSON (`/api/export.geojson`), sans aucune donnée personnelle. |
+| ⚑ **Modération** | Tout membre peut signaler un contenu. Les modérateurs (nommés par `select public.make_admin('e-mail')` dans Supabase) voient les signalements, peuvent corriger ou supprimer n'importe quelle boîte et téléchargent une sauvegarde complète. |
+| 📤 **Données ouvertes** | Export public de la carte en GeoJSON (bouton dans l'onglet Communauté), sans aucune donnée personnelle. |
 | ✈️ **Hors ligne** | L'interface et la dernière carte consultée restent disponibles sans réseau. |
 
 ### Comment la balade est calculée
@@ -84,81 +84,83 @@ Les deux polices sont sous licence SIL Open Font License 1.1 et sont **hébergé
 
 ---
 
-## 3. Lancer l'application
+## 3. Architecture et mise en ligne
 
-> 👉 **Guide pas à pas pour débutants : [TUTORIEL.md](TUTORIEL.md)**. Il couvre l'installation de Node.js, le lancement sur votre ordinateur, la mise en ligne sur Railway, les sauvegardes et les problèmes fréquents.
+> 👉 **Guide pas à pas, faisable depuis un iPad : [TUTORIEL.md](TUTORIEL.md).**
 
-**Prérequis :** Node.js **22.13 ou plus récent**, idéalement la version LTS actuelle. C'est tout : aucune dépendance à installer, la base de données SQLite est intégrée à Node.
-
-```bash
-git clone https://github.com/dxtsy7t2hx-commits/bibliorue.git
-cd bibliorue
-cp .env.example .env     # puis indiquez votre e-mail dans ADMIN_EMAILS
-npm start
 ```
-Ouvrez <http://localhost:8080>. Les réglages sont lus dans `.env` (voir `.env.example`), et les données sont stockées dans `data/bibliorue.db`.
-
-### Mise en ligne
-L'application a besoin d'un **serveur Node.js avec un disque persistant**. Sans disque persistant, la base de données serait effacée à chaque redémarrage. GitHub Pages ne convient donc plus : il ne sert que des fichiers fixes, sans serveur.
-
-Avec Docker, sur un hébergeur qui accepte les images Docker et les volumes (Fly.io, Railway, Render avec disque, un VPS…) :
-```bash
-docker build -t bibliorue .
-docker run -p 8080:8080 -v bibliorue-data:/data -e ADMIN_EMAILS=vous@exemple.fr bibliorue
+navigateur ──► GitHub Pages (fichiers de l'application : HTML, CSS, JS, polices, pictogrammes)
+     │
+     └──────► Supabase : Auth (comptes) + PostgreSQL (données) + règles de sécurité
 ```
-En production, servez l'application **en HTTPS**. Les hébergeurs cités le font automatiquement. C'est nécessaire pour trois choses : la géolocalisation, le scan par caméra et la sécurité des cookies de session.
 
-**Sauvegarde :** il suffit de copier le fichier `bibliorue.db`. Faites-le régulièrement.
+- **Il n'y a pas de serveur à gérer.** L'application est un ensemble de fichiers statiques, publiés gratuitement par **GitHub Pages**.
+- **Supabase** fournit la base de données PostgreSQL et la gestion des comptes : inscription, connexion, confirmation d'e-mail, mot de passe oublié.
+- **Toute la logique sensible est dans la base de données**, dans le fichier `supabase/migrations/20261111120000_bibliorue.sql` :
+  - les tables sont protégées par la **sécurité au niveau des lignes** (*Row Level Security*, RLS : la base vérifie elle-même, ligne par ligne, qui peut lire ou écrire). Tout le monde peut lire la carte ; **personne ne peut écrire directement dans les tables** ;
+  - les écritures passent par des **fonctions SQL** (`add_box`, `add_book`, `change_book`, `report`…). Chacune vérifie l'identité du membre (`auth.uid()`), ses droits, les doublons et la limite d'actions ;
+  - les droits d'exécution de chaque fonction sont accordés un par un.
+- **Le navigateur ne détient qu'une clé publique** (*publishable key*), faite pour être visible (Supabase, s.d.-a).
+
+L'ancienne version, avec un serveur Node.js et SQLite, reste disponible dans l'historique Git (commit `bbf43a0`).
+
+### Essayer en local (sur un ordinateur)
+```bash
+npm start        # petit serveur de fichiers sur http://localhost:8080
+```
+Il faut d'abord renseigner `js/config.js` avec l'URL et la clé publique d'un projet Supabase.
 
 ### Tests
 ```bash
 npm test
 ```
-Il y a 28 tests automatiques :
-- l'API : comptes, droits, doublons, livres, modération, protection CSRF, suppression de compte, limitation des tentatives de connexion ;
-- l'algorithme de balade ;
-- les ISBN, les distances, l'analyse des réponses d'OpenStreetMap et d'Open Library.
+- **Tests de la base** (`tests/supabase.test.js`). Ils utilisent la **vraie bibliothèque supabase-js**. Elle dialogue avec une imitation de Supabase (`tests/fake-supabase.mjs`), qui exécute le **script SQL réel** dans un PostgreSQL local. Les règles de sécurité, les inscriptions, les doublons, les livres, la modération, la limite d'actions et la suppression de compte sont ainsi vérifiés. Ces tests sont ignorés si aucun PostgreSQL n'est disponible.
+- **Tests des modules** : ISBN, distances, OpenStreetMap, Open Library, algorithme de balade.
+- Sur GitHub, l'intégration continue lance tous ces tests avec un PostgreSQL 16 (`.github/workflows/ci.yml`).
 
 ---
 
 ## 4. Organisation du code
 
 ```
-server/index.js     démarrage du serveur HTTP
-server/app.js       API REST + service des fichiers de l'interface
-server/auth.js      mots de passe (scrypt), sessions, limitation de débit
-server/db.js        schéma SQLite (users, sessions, boxes, books, events, reports)
-index.html, css/    interface (mobile d'abord, thème sombre automatique, pictogrammes SVG intégrés)
-fonts/              polices Lilita One et Nunito (woff2) + licences OFL
-js/app.js           logique de l'interface (carte Leaflet, fiches, balade, compte)
-js/api.js           client de l'API
-js/route.js         conseiller de balade + itinéraire OSRM
-js/geo.js, isbn.js, overpass.js, openlibrary.js   modules utilitaires (partagés client/serveur)
-sw.js, manifest.webmanifest                       application installable et hors ligne
-tests/              tests node:test
-Dockerfile          image de production
+index.html, css/            interface (mobile d'abord, thème sombre automatique, pictogrammes SVG intégrés)
+js/app.js                   logique de l'interface (carte Leaflet, fiches, balade, compte)
+js/api.js                   accès aux données via Supabase (fonctions SQL « RPC »)
+js/config.js                URL et clé publique du projet Supabase (à remplir)
+js/route.js                 conseiller de balade + itinéraire OSRM
+js/geo.js, isbn.js, overpass.js, openlibrary.js   modules utilitaires
+vendor/                     bibliothèque supabase-js 2.118.0 (licence MIT), servie avec l'application
+supabase/migrations/        script d'installation de la base (tables, RLS, fonctions)
+fonts/                      polices Lilita One et Nunito (woff2) + licences OFL
+sw.js, manifest.webmanifest application installable, interface disponible hors ligne
+scripts/serve.mjs           serveur de fichiers pour les essais locaux
+tests/                      tests automatiques (node:test)
 ```
 
 ### Sécurité et vie privée
-- **Mots de passe** hachés avec **scrypt** (Percival, 2009). Le hachage transforme le mot de passe de façon irréversible ; le sel aléatoire empêche de comparer deux comptes entre eux.
-- **Sessions** : jeton aléatoire de 256 bits, placé dans un cookie `HttpOnly` (illisible par un script de la page) et `SameSite=Lax`. Seule l'empreinte du jeton est stockée en base.
-- **Protection CSRF** (attaque où un autre site déclenche une action à votre insu) : les écritures exigent du JSON et une origine identique à celle du site.
-- **En-têtes de sécurité** : politique de sécurité du contenu (CSP) et interdiction d'afficher le site dans un cadre.
-- **Échappement systématique** des textes affichés, pour empêcher l'injection de code (XSS).
-- **Limitation des tentatives** : connexion et inscription limitées par adresse IP, écritures limitées par compte.
-- **L'e-mail n'est jamais public.** Seul le nom choisi apparaît, et un pseudonyme est possible.
-- **Droit à l'effacement** (RGPD, art. 17) : « Supprimer mon compte » efface le compte. Les boîtes et livres ajoutés restent sur la carte commune, sans nom.
+- **Comptes gérés par Supabase Auth.** Les mots de passe y sont hachés (transformés de façon irréversible) et ne transitent jamais par nos fichiers.
+- **Écritures uniquement via des fonctions contrôlées.** Les droits directs d'insertion, de modification et de suppression sont retirés aux rôles publics. Les signalements sont illisibles hors modération.
+- **Règles métier vérifiées par la base**, et non par l'interface :
+  - seuls les comptes « lieu culturel » créent des lieux culturels ;
+  - seul l'auteur ou un modérateur modifie une boîte ;
+  - refus d'une boîte à moins de 15 m d'une autre ;
+  - 60 actions par minute au maximum par membre.
+- **Politique de sécurité du contenu** (CSP, *Content Security Policy*), déclarée dans la page : elle limite les sites que l'application a le droit de contacter.
+- **Textes affichés systématiquement échappés**, contre l'injection de code (XSS).
+- **L'e-mail n'est jamais public**, ni dans la carte, ni dans l'export, ni dans la sauvegarde.
+- **Droit à l'effacement** (RGPD, art. 17) : « Supprimer mon compte » (après une nouvelle saisie du mot de passe) efface le compte. Les boîtes et livres ajoutés restent sur la carte commune, sans nom.
 
 ---
 
 ## 5. À faire avant une ouverture au public
 
 1. **Mentions légales et politique de confidentialité.** Le site conserve des e-mails : le RGPD s'applique. Il faut indiquer qui est responsable du traitement, à quoi servent les données et combien de temps on les garde (CNIL, s.d.).
-2. **Vérification de l'e-mail et mot de passe oublié.** Ces fonctions ne sont pas encore faites, car elles exigent un service d'envoi d'e-mails. D'ici là, un mot de passe oublié ne peut pas être récupéré.
-3. **Vérification des lieux culturels.** Aujourd'hui, l'inscription « lieu culturel » est déclarative : n'importe qui peut cocher la case. Un badge « vérifié », attribué par un modérateur, éviterait les usurpations.
-4. **Photos des boîtes**, très utiles pour les reconnaître sur place. Elles demandent du stockage et une modération des images.
-5. **Contribution en retour à OpenStreetMap.** Les boîtes ajoutées ici n'y sont pas envoyées automatiquement.
-6. **Montée en charge.** Les serveurs publics Overpass, OSRM et les tuiles OSM sont gérés par des bénévoles et ont des règles d'usage (OpenStreetMap Foundation, s.d.). Avec beaucoup d'utilisateurs, il faudra un fournisseur de tuiles et d'itinéraires dédié.
+2. **Brancher un service d'envoi d'e-mails (SMTP).** La confirmation d'adresse et le « mot de passe oublié » sont prêts dans l'application. Mais le service d'e-mail intégré de Supabase n'écrit qu'aux membres de l'équipe du projet, à raison de 2 e-mails par heure (Supabase, s.d.-c). Voir TUTORIEL.md, étape 9.
+3. **Sauvegardes régulières.** L'offre gratuite de Supabase n'en fait pas automatiquement (Supabase, s.d.-d) : utilisez le bouton de sauvegarde de la section Modération.
+4. **Vérification des lieux culturels.** Aujourd'hui, l'inscription « lieu culturel » est déclarative : n'importe qui peut cocher la case. Un badge « vérifié », attribué par un modérateur, éviterait les usurpations.
+5. **Photos des boîtes**, très utiles pour les reconnaître sur place. Le stockage de fichiers de Supabase s'y prête ; il faudra aussi modérer les images.
+6. **Contribution en retour à OpenStreetMap.** Les boîtes ajoutées ici n'y sont pas envoyées automatiquement.
+7. **Montée en charge.** Les serveurs publics Overpass, OSRM et les tuiles OSM sont gérés par des bénévoles et ont des règles d'usage (OpenStreetMap Foundation, s.d.). Avec beaucoup d'utilisateurs, il faudra un fournisseur de tuiles et d'itinéraires dédié.
 
 ---
 
@@ -190,9 +192,15 @@ OpenStreetMap Wiki contributors. (s.d.). *Tag:amenity=public_bookcase*. OpenStre
 
 Outils Tice. (2020). *Les meilleurs sites pour trouver des boîtes à livres*. https://outilstice.com/sites-pour-trouver-des-boites-a-livres/
 
-Percival, C. (2009). *Stronger key derivation via sequential memory-hard functions* [Communication]. BSDCan'09, Ottawa, Canada. https://www.tarsnap.com/scrypt/scrypt.pdf
-
 Région Île-de-France. (s.d.). *La carte des 100 boîtes à livres Région Île-de-France dans les gares*. Consulté le 11 novembre 2026, à l'adresse https://www.iledefrance.fr/toutes-les-actualites/la-carte-des-100-boites-livres-region-ile-de-france-dans-les-gares
+
+Supabase. (s.d.-a). *API keys*. Supabase Docs. Consulté le 11 novembre 2026, à l'adresse https://supabase.com/docs/guides/api/api-keys
+
+Supabase. (s.d.-b). *Row Level Security*. Supabase Docs. Consulté le 11 novembre 2026, à l'adresse https://supabase.com/docs/guides/database/postgres/row-level-security
+
+Supabase. (s.d.-c). *Send emails with custom SMTP*. Supabase Docs. Consulté le 11 novembre 2026, à l'adresse https://supabase.com/docs/guides/auth/auth-smtp
+
+Supabase. (s.d.-d). *Database backups*. Supabase Docs. Consulté le 11 novembre 2026, à l'adresse https://supabase.com/docs/guides/platform/backups
 
 Ville de Paris. (s.d.). *Où sont les boîtes à livres à Paris ?* Consulté le 11 novembre 2026, à l'adresse https://www.paris.fr/pages/ou-sont-les-boites-a-livres-a-paris-25227
 

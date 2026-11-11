@@ -1,15 +1,15 @@
 {
   "name": "bibliorue",
-  "version": "2.0.0",
-  "description": "Carte communautaire des bibliothèques de rue et des lieux culturels, avec conseiller de balade.",
+  "version": "3.0.0",
+  "description": "Carte communautaire des bibliothèques de rue (GitHub Pages + Supabase), avec conseiller de balade.",
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node --env-file-if-exists=.env --disable-warning=ExperimentalWarning server/index.js",
+    "start": "node scripts/serve.mjs",
     "test": "node --disable-warning=ExperimentalWarning --test tests/*.test.js"
   },
   "license": "MIT",
   "engines": {
-    "node": ">=22.13"
+    "node": ">=20"
   }
 }
