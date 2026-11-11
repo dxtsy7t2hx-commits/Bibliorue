@@ -129,6 +129,13 @@
         </div>
       </div>
 
+      <!-- Balade en cours -->
+      <div id="walk-banner" class="walk-banner" role="status" hidden>
+        <svg class="pi" aria-hidden="true"><use href="#pi-walk"/></svg>
+        <span id="walk-banner-text">Balade en cours</span>
+        <button id="btn-stop-walk" class="pill" type="button"><svg class="pi"><use href="#pi-close"/></svg>Arrêter</button>
+      </div>
+
       <!-- Feuille coulissante -->
       <div id="sheet" class="sheet" data-state="peek">
         <button class="sheet-grip" id="sheet-grip" type="button" aria-label="Agrandir ou réduire la liste"><span></span></button>
@@ -137,7 +144,7 @@
             <p class="eyebrow" id="near-count">À deux pas</p>
             <h2 class="poster sm">Les boîtes autour</h2>
           </div>
-          <button class="round ghost" id="sheet-toggle" type="button" aria-label="Agrandir la liste"><svg class="pi"><use href="#pi-chev"/></svg></button>
+          <button class="round" id="sheet-toggle" type="button" aria-label="Agrandir la liste"><svg class="pi"><use href="#pi-chev"/></svg></button>
         </div>
         <ul id="box-list" class="cards-rail"></ul>
         <div class="sheet-foot">
