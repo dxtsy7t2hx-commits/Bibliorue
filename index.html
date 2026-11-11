@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Bibliorue</title>
-  <meta name="description" content="Trouver les boîtes à livres près de chez soi et savoir quels livres s'y trouvent.">
+  <meta name="description" content="La carte communautaire des bibliothèques de rue et des lieux culturels du livre, avec des balades de boîte en boîte.">
   <meta name="theme-color" content="#7a3e1d">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -15,8 +15,11 @@
 </head>
 <body>
   <header class="topbar">
-    <h1><img src="icons/icon.svg" alt="" width="28" height="28"> Bibliorue</h1>
-    <p class="tagline">Les boîtes à livres de votre quartier</p>
+    <div>
+      <h1><img src="icons/icon.svg" alt="" width="28" height="28"> Bibliorue</h1>
+      <p class="tagline">La carte communautaire des bibliothèques de rue</p>
+    </div>
+    <button id="btn-account" class="account-btn" type="button">Se connecter</button>
   </header>
 
   <main>
@@ -24,59 +27,142 @@
     <section id="view-map" class="view active" aria-label="Carte">
       <div class="map-tools">
         <button id="btn-locate" type="button">📍 Me localiser</button>
-        <button id="btn-osm" type="button">🔄 Boîtes OpenStreetMap de la zone</button>
-        <button id="btn-add-box" type="button" class="primary">＋ Ajouter une boîte</button>
+        <button id="btn-osm" type="button" aria-pressed="false">🗂️ Boîtes OSM à importer</button>
+        <button id="btn-add-box" type="button" class="primary">＋ Ajouter</button>
       </div>
-      <p id="map-hint" class="hint" hidden>Touchez la carte à l'emplacement de la boîte.</p>
-      <div id="map" role="application" aria-label="Carte des boîtes à livres"></div>
-      <h2 class="list-title">Boîtes les plus proches</h2>
+      <p id="map-hint" class="hint" hidden>Touchez la carte à l'emplacement exact de la boîte. <button id="btn-cancel-pick" class="small" type="button">Annuler</button></p>
+      <div id="map" role="application" aria-label="Carte des bibliothèques de rue"></div>
+      <ul class="legend" aria-label="Légende">
+        <li><span class="dot street"></span>Bibliothèque de rue</li>
+        <li><span class="dot venue"></span>Lieu culturel</li>
+        <li><span class="dot osm"></span>Recensée dans OSM, pas encore sur Bibliorue</li>
+        <li><span class="dot me"></span>Vous</li>
+      </ul>
+      <h2 class="list-title">À proximité</h2>
       <ul id="box-list" class="cards"></ul>
     </section>
 
-    <!-- RECHERCHE -->
+    <!-- BALADE -->
+    <section id="view-walk" class="view" aria-label="Balade">
+      <h2>Ma balade de boîte en boîte</h2>
+      <p class="small">Bibliorue choisit les boîtes à visiter et l'ordre le plus court dans le temps dont vous disposez, à partir de votre position ou du centre de la carte.</p>
+      <form id="walk-form">
+        <div class="row">
+          <label class="field grow"><span>Temps disponible</span>
+            <select name="budget">
+              <option value="30">30 min</option>
+              <option value="60" selected>1 h</option>
+              <option value="90">1 h 30</option>
+              <option value="120">2 h</option>
+              <option value="180">3 h</option>
+              <option value="240">4 h</option>
+            </select></label>
+          <label class="field grow"><span>Départ</span>
+            <select name="start">
+              <option value="gps">Ma position</option>
+              <option value="center">Centre de la carte</option>
+            </select></label>
+        </div>
+        <label class="check"><input type="checkbox" name="loop" checked> Revenir au point de départ (boucle)</label>
+        <label class="check"><input type="checkbox" name="venues" checked> Inclure les lieux culturels</label>
+        <label class="check"><input type="checkbox" name="withBooks"> Seulement les boîtes où des livres sont signalés</label>
+        <button class="primary" type="submit">🚶 Proposer une balade</button>
+      </form>
+      <div id="walk-result" role="status"></div>
+    </section>
+
+    <!-- LIVRES -->
     <section id="view-search" class="view" aria-label="Rechercher un livre">
-      <h2>Rechercher un livre</h2>
+      <h2>Trouver un livre</h2>
       <label class="field">
         <span>Titre, auteur ou ISBN</span>
-        <input id="search-input" type="search" autocomplete="off" placeholder="ex. Victor Hugo">
+        <input id="search-input" type="search" autocomplete="off" placeholder="ex. Annie Ernaux">
       </label>
-      <label class="check"><input id="search-taken" type="checkbox"> Inclure les livres déjà empruntés</label>
       <ul id="search-results" class="cards"></ul>
     </section>
 
-    <!-- ACTIVITÉ -->
-    <section id="view-activity" class="view" aria-label="Activité">
-      <h2>Activité</h2>
+    <!-- COMMUNAUTÉ -->
+    <section id="view-community" class="view" aria-label="Communauté">
+      <h2>La communauté</h2>
       <div id="stats" class="stats"></div>
+      <h3>Dernières contributions</h3>
       <ul id="events" class="events"></ul>
+      <h3>À propos</h3>
+      <p>Une <strong>bibliothèque de rue</strong> (ou « boîte à livres ») est un meuble en libre accès dans l'espace public : on y dépose et on y prend des livres gratuitement. Bibliorue est une carte <strong>tenue par ses utilisateurs</strong>. Tout le monde peut la consulter ; il faut un compte pour ajouter une boîte ou un livre. Les <strong>lieux culturels</strong> (bibliothèques, librairies, cafés-livres, associations…) peuvent s'inscrire comme tels et apparaissent en violet.</p>
+      <p class="small">Fond de carte et boîtes « OSM » © contributeurs OpenStreetMap (ODbL). Fiches livres : Open Library. Itinéraires : OSRM / FOSSGIS. <a href="/api/export.geojson" download="bibliorue.geojson">Télécharger la carte (GeoJSON, données ouvertes)</a></p>
     </section>
 
-    <!-- À PROPOS -->
-    <section id="view-about" class="view" aria-label="À propos">
-      <h2>À propos de Bibliorue</h2>
-      <p>Une <strong>boîte à livres</strong> (on parle aussi de <em>bibliothèque de rue</em>, d'« armoire à livres » ou, en anglais, de <em>Little Free Library</em>) est un meuble installé dans l'espace public. Chacun peut y déposer ou y prendre des livres gratuitement, sans inscription. Bibliorue sert à les trouver et à savoir quels livres on y a vus.</p>
-      <h3>D'où viennent les données ?</h3>
-      <ul>
-        <li><strong>Boîtes « OSM »</strong> : lues en direct dans OpenStreetMap (étiquette <code>amenity=public_bookcase</code>) via l'API Overpass. © contributeurs OpenStreetMap, licence ODbL.</li>
-        <li><strong>Boîtes « perso »</strong> : celles que vous ajoutez vous-même.</li>
-        <li><strong>Fiches livres</strong> : saisies par vous, ou complétées automatiquement à partir de l'ISBN via l'API d'Open Library (Internet Archive).</li>
-      </ul>
-      <p>Tout est enregistré <strong>sur cet appareil uniquement</strong>. Pour sauvegarder ou partager, exportez un fichier.</p>
-      <h3>Sauvegarde</h3>
-      <div class="row">
-        <button id="btn-export" type="button">⬇️ Exporter (JSON)</button>
-        <label class="button">⬆️ Importer<input id="file-import" type="file" accept="application/json,.json" hidden></label>
-        <button id="btn-reset" type="button" class="danger">Tout effacer</button>
+    <!-- COMPTE -->
+    <section id="view-account" class="view" aria-label="Compte">
+      <div id="account-out">
+        <h2>Rejoindre Bibliorue</h2>
+        <p class="small">Un compte est nécessaire pour ajouter une boîte, signaler un livre ou indiquer qu'on l'a pris. Consulter la carte reste libre.</p>
+        <div class="segmented" role="tablist">
+          <button type="button" role="tab" data-auth="login" aria-selected="true">J'ai un compte</button>
+          <button type="button" role="tab" data-auth="register" aria-selected="false">Créer un compte</button>
+        </div>
+        <form id="login-form" class="auth-form">
+          <label class="field"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
+          <label class="field"><span>Mot de passe</span><input name="password" type="password" autocomplete="current-password" required></label>
+          <p class="msg" role="status"></p>
+          <button class="primary" type="submit">Se connecter</button>
+        </form>
+        <form id="register-form" class="auth-form" hidden>
+          <fieldset class="types">
+            <legend>Je m'inscris en tant que</legend>
+            <label class="type-card"><input type="radio" name="accountType" value="person" checked>
+              <span><strong>👤 Particulier</strong><small>Je partage les boîtes et les livres que je croise.</small></span></label>
+            <label class="type-card venue"><input type="radio" name="accountType" value="culture">
+              <span><strong>🏛️ Lieu culturel</strong><small>Bibliothèque, librairie, café-livres, association… Mon lieu apparaît en violet sur la carte.</small></span></label>
+          </fieldset>
+          <label class="field"><span id="name-label">Nom affiché</span><input name="displayName" required maxlength="80" autocomplete="nickname"></label>
+          <div id="venue-fields" hidden>
+            <label class="field"><span>Type de lieu</span>
+              <select name="venueKind">
+                <option value="bibliotheque">Bibliothèque</option>
+                <option value="mediatheque">Médiathèque</option>
+                <option value="librairie">Librairie</option>
+                <option value="cafe">Café-livres</option>
+                <option value="association">Association</option>
+                <option value="centre_culturel">Centre culturel</option>
+                <option value="ecole">École / université</option>
+                <option value="autre">Autre</option>
+              </select></label>
+            <label class="field"><span>Site web (facultatif)</span><input name="website" type="url" inputmode="url" placeholder="https://…"></label>
+          </div>
+          <label class="field"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
+          <label class="field"><span>Mot de passe (8 caractères minimum)</span><input name="password" type="password" minlength="8" autocomplete="new-password" required></label>
+          <p class="small">Votre e-mail n'est jamais affiché. Seul votre nom apparaît à côté de vos contributions.</p>
+          <p class="msg" role="status"></p>
+          <button class="primary" type="submit">Créer mon compte</button>
+        </form>
       </div>
-      <p class="small">Version <span id="app-version"></span></p>
+
+      <div id="account-in" hidden>
+        <h2 id="me-name"></h2>
+        <p id="me-type"></p>
+        <div id="me-stats" class="stats"></div>
+        <div id="me-venue-cta" class="panel venue-cta" hidden>
+          <p><strong>Placez votre lieu sur la carte.</strong> En tant que lieu culturel, vous pouvez l'ajouter en violet : les promeneurs le verront et pourront l'inclure dans leur balade.</p>
+          <button id="btn-add-venue" type="button" class="primary">＋ Ajouter mon lieu</button>
+        </div>
+        <div class="row">
+          <button id="btn-logout" type="button">Se déconnecter</button>
+          <button id="btn-delete-me" type="button" class="danger">Supprimer mon compte</button>
+        </div>
+        <section id="admin" hidden>
+          <h3>Modération : signalements</h3>
+          <ul id="reports" class="events"></ul>
+        </section>
+      </div>
     </section>
   </main>
 
   <nav class="tabbar" aria-label="Navigation principale">
     <button data-view="view-map" class="active" type="button"><span aria-hidden="true">🗺️</span>Carte</button>
+    <button data-view="view-walk" type="button"><span aria-hidden="true">🚶</span>Balade</button>
     <button data-view="view-search" type="button"><span aria-hidden="true">🔎</span>Livres</button>
-    <button data-view="view-activity" type="button"><span aria-hidden="true">📜</span>Activité</button>
-    <button data-view="view-about" type="button"><span aria-hidden="true">ℹ️</span>À propos</button>
+    <button data-view="view-community" type="button"><span aria-hidden="true">🤝</span>Communauté</button>
   </nav>
 
   <!-- Fiche d'une boîte -->
@@ -86,9 +172,8 @@
       <button class="close" aria-label="Fermer">✕</button>
     </form>
     <div id="box-body"></div>
-
     <details id="add-book" class="panel">
-      <summary>＋ Déposer un livre dans cette boîte</summary>
+      <summary>＋ J'ai déposé un livre ici</summary>
       <form id="book-form" autocomplete="off">
         <div class="isbn-row">
           <label class="field grow"><span>ISBN (au dos, sous le code-barres)</span>
@@ -97,13 +182,13 @@
           <button type="button" id="btn-scan" hidden>📷 Scanner</button>
         </div>
         <video id="scan-video" playsinline muted hidden></video>
-        <label class="field"><span>Titre *</span><input name="title" required></label>
+        <label class="field"><span>Titre *</span><input name="title" required maxlength="200"></label>
         <label class="field"><span>Auteur(s)</span><input name="authors"></label>
         <div class="row">
           <label class="field grow"><span>Année</span><input name="year"></label>
           <label class="field grow"><span>Éditeur</span><input name="publisher"></label>
         </div>
-        <label class="field"><span>Remarque (état, genre…)</span><input name="note"></label>
+        <label class="field"><span>Remarque (état, genre…)</span><input name="note" maxlength="300"></label>
         <input type="hidden" name="coverUrl">
         <p id="book-msg" class="msg" role="status"></p>
         <button class="primary" type="submit">Enregistrer le dépôt</button>
@@ -114,14 +199,21 @@
   <!-- Ajout / modification d'une boîte -->
   <dialog id="boxform-dialog">
     <form method="dialog" class="dialog-head">
-      <h2 id="boxform-title">Nouvelle boîte à livres</h2>
+      <h2 id="boxform-title">Nouvelle bibliothèque de rue</h2>
       <button class="close" aria-label="Fermer">✕</button>
     </form>
     <form id="boxform">
       <input type="hidden" name="id">
-      <label class="field"><span>Nom *</span><input name="name" required placeholder="ex. Boîte du square"></label>
-      <label class="field"><span>Adresse ou repère</span><input name="address"></label>
-      <label class="field"><span>Description</span><textarea name="description" rows="2"></textarea></label>
+      <input type="hidden" name="osmId">
+      <fieldset id="category-field" class="types" hidden>
+        <legend>Type</legend>
+        <label class="type-card"><input type="radio" name="category" value="street" checked><span><strong>📚 Bibliothèque de rue</strong></span></label>
+        <label class="type-card venue"><input type="radio" name="category" value="venue"><span><strong>🏛️ Mon lieu culturel</strong></span></label>
+      </fieldset>
+      <label class="field"><span>Nom *</span><input name="name" required maxlength="120" placeholder="ex. Boîte du square Saint-Jean"></label>
+      <label class="field"><span>Adresse ou repère</span><input name="address" maxlength="200"></label>
+      <label class="field"><span>Description</span><textarea name="description" rows="2" maxlength="1000" placeholder="Forme, couleur, accès…"></textarea></label>
+      <label class="field"><span>Horaires (si lieu fermé la nuit)</span><input name="hours" maxlength="200" placeholder="ex. Mar–sam 10 h–19 h"></label>
       <div class="row coords">
         <label class="field grow"><span>Latitude</span><input name="lat" inputmode="decimal" required></label>
         <label class="field grow"><span>Longitude</span><input name="lon" inputmode="decimal" required></label>

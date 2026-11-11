@@ -1,144 +1,167 @@
 # Bibliorue
 
-**Bibliorue** est une application web installable sur téléphone (une *PWA*, voir plus bas) pour **trouver les boîtes à livres** près de chez soi et **savoir quels livres s'y trouvent**.
+**Bibliorue** est une **carte communautaire des bibliothèques de rue**. Tout le monde peut la consulter. Les membres inscrits y ajoutent les boîtes qu'ils connaissent et les livres qu'ils y voient. L'application **propose aussi des balades** qui vont de boîte en boîte, selon le temps dont on dispose.
 
-> **Boîte à livres** (on dit aussi *bibliothèque de rue*, *armoire à livres* ou, en anglais, *Little Free Library*) : meuble installé dans l'espace public. Chacun peut y déposer ou y prendre des livres gratuitement, sans inscription ni obligation de rendre. Le mouvement *Little Free Library* est né en 2009 : à Hudson, dans le Wisconsin (États-Unis), Todd Bol fabrique alors une maquette d'école à classe unique remplie de livres (Little Free Library, s.d.). En France, ces boîtes sont souvent installées par des communes, des associations ou des habitants.
+Les **lieux culturels** (bibliothèques, médiathèques, librairies, cafés-livres, associations…) peuvent s'inscrire comme tels. Ils apparaissent alors **en violet** sur la carte, et les promeneurs peuvent les inclure dans leur balade.
 
 ---
 
-## 1. Ce que fait l'application
+## 1. Contexte
 
-| Fonction | Détail |
+Une **bibliothèque de rue** (ou « boîte à livres ») est un meuble en libre accès dans l'espace public : chacun y dépose et y prend des livres gratuitement, sans inscription ni obligation de rendre.
+
+Le mouvement anglophone *Little Free Library* fait remonter son origine à 2009. Cette année-là, à Hudson (Wisconsin, États-Unis), Todd Bol fabrique une maquette d'école remplie de livres (Little Free Library, s.d.). En France, les boîtes sont installées par des communes, des associations ou des habitants.
+
+### Ce qui existe déjà
+- **Des annuaires collaboratifs**, comme *Boîte à lire* ou *Le Bouquin Français*, où l'on ajoute une boîte par formulaire (Outils Tice, 2020).
+- **Des cartes locales** : Ville de Paris (s.d.), ou la Région Île-de-France pour ses 100 boîtes en gare (Région Île-de-France, s.d.).
+- **Un jeu de données** sur data.gouv.fr (s.d.).
+- **OpenStreetMap**, la carte libre et collaborative mondiale, où les boîtes sont décrites avec l'étiquette `amenity=public_bookcase` (OpenStreetMap Wiki contributors, s.d.).
+
+### Ce que Bibliorue ajoute
+Les quatre éléments réunis dans une même application :
+1. la carte communautaire ;
+2. l'inventaire des livres de chaque boîte ;
+3. un **conseiller de balade** ;
+4. une **place spécifique pour les lieux culturels**.
+
+Bibliorue se branche aussi sur OpenStreetMap : les boîtes déjà recensées y apparaissent en gris et s'importent en un clic.
+
+---
+
+## 2. Fonctions
+
+| | |
 |---|---|
-| 🗺️ **Carte** | Fond OpenStreetMap avec les boîtes. Un repère vert signale une boîte issue d'OpenStreetMap, un repère brun une boîte que vous avez ajoutée. |
-| 🔄 **Boîtes réelles** | Le bouton « Boîtes OpenStreetMap de la zone » interroge OpenStreetMap et récupère toutes les boîtes déjà recensées dans la partie visible de la carte. Dans OSM, ces boîtes portent l'étiquette `amenity=public_bookcase`. |
-| 📍 **Près de moi** | Géolocalisation, puis liste des boîtes triées par distance. La distance est calculée à vol d'oiseau par la formule de haversine. |
-| ＋ **Ajouter une boîte** | Touchez le bouton, puis l'emplacement sur la carte, et remplissez le nom, l'adresse et la description. |
-| 📚 **Livres** | Pour chaque boîte : liste des livres signalés, dépôt d'un livre, « Je le prends » (emprunt), « Je le redépose ici », « Absent ». |
-| 🔢 **ISBN** | Saisir l'ISBN (le numéro sous le code-barres) remplit automatiquement le titre, l'auteur, l'éditeur et la couverture via Open Library. Sur Chrome Android, le bouton 📷 lit directement le code-barres avec la caméra. |
-| 🔎 **Recherche** | Par titre, auteur ou ISBN, dans toutes les boîtes. La recherche ignore les accents et les majuscules. |
-| 📜 **Activité** | Statistiques et historique des dépôts et emprunts. |
-| 💾 **Sauvegarde** | Export et import d'un fichier JSON, par exemple pour changer de téléphone ou partager un inventaire. |
-| ✈️ **Hors ligne** | L'interface et vos données restent accessibles sans réseau. Les fonds de carte et les recherches en ligne ont besoin d'Internet. |
+| 🗺️ **Carte partagée** | Visible sans compte. Code couleur : 🟤 bibliothèque de rue · 🟣 lieu culturel · ⚪ boîte recensée dans OSM mais pas encore sur Bibliorue · 🔵 vous. |
+| 👤 **Comptes** | Obligatoires pour ajouter une boîte ou un livre, indiquer qu'on prend un livre, ou signaler un contenu. Deux types d'inscription : **Particulier** ou **Lieu culturel** (avec le type de lieu et un site web). |
+| 🏛️ **Lieux culturels** | Seul un compte « lieu culturel » peut placer un lieu violet. La règle est vérifiée par le serveur, pas seulement par l'interface. Sa fiche affiche le type de lieu, ses horaires et son site. |
+| ➕ **Ajout de boîte** | On touche la carte à l'emplacement exact de la boîte. Le serveur **refuse les doublons** : une autre boîte à moins de 15 m, ou le même identifiant OSM. |
+| 📚 **Livres** | Dépôt, avec fiche remplie automatiquement à partir de l'ISBN via Open Library, ou par scan du code-barres. Puis « Je le prends », « Je le redépose ici », « N'y est plus ». |
+| 🚶 **Balade** | On choisit son temps disponible (30 min à 4 h), une boucle ou un aller simple, et si l'on inclut les lieux culturels. Bibliorue choisit les étapes, les ordonne et trace l'itinéraire piéton réel. La balade s'ouvre ensuite dans une application GPS. |
+| 🔎 **Recherche** | Un livre précis, dans toutes les boîtes, trié par distance. |
+| 🤝 **Communauté** | Statistiques et fil des dernières contributions. |
+| ⚑ **Modération** | Tout membre peut signaler un contenu. Les modérateurs (variable `ADMIN_EMAILS`) voient les signalements et peuvent corriger ou supprimer n'importe quelle boîte. |
+| 📤 **Données ouvertes** | Export public de la carte en GeoJSON (`/api/export.geojson`), sans aucune donnée personnelle. |
+| ✈️ **Hors ligne** | L'interface et la dernière carte consultée restent disponibles sans réseau. |
 
-### Confidentialité
-Tout est enregistré **uniquement sur l'appareil**, dans le `localStorage` du navigateur (un petit espace de stockage propre à chaque site). Il n'y a ni compte, ni serveur Bibliorue, ni traqueur. Les seules requêtes vers l'extérieur sont :
-- les tuiles de carte, chez OpenStreetMap ;
-- la recherche de boîtes, chez Overpass (lecture d'OpenStreetMap) ;
-- la recherche ISBN, chez Open Library.
+### Comment la balade est calculée
+Il s'agit de visiter le plus de boîtes intéressantes dans un temps limité. En recherche opérationnelle (la discipline mathématique de l'optimisation), c'est le **problème d'orientation** (*orienteering problem*, Golden et al., 1987).
 
-Ces requêtes contiennent la zone affichée ou l'ISBN saisi, jamais vos données personnelles.
+Ce problème est **NP-difficile** : aucune méthode connue ne garantit la meilleure solution en un temps raisonnable dès qu'il y a beaucoup de points. On utilise donc une **heuristique**, c'est-à-dire une méthode rapide qui donne une très bonne solution sans prouver qu'elle est la meilleure :
+
+1. **Insertion la moins coûteuse.** On ajoute à chaque fois la boîte qui apporte le plus d'intérêt pour le moins de minutes supplémentaires. L'intérêt est plus élevé si la boîte contient des livres ou s'il s'agit d'un lieu culturel.
+2. **Amélioration « 2-opt »** (Croes, 1958). On inverse des portions du parcours tant que cela le raccourcit. Résultat : un tracé sans croisements.
+3. **Nouvel essai d'insertion** avec le temps ainsi libéré.
+
+Les temps sont d'abord estimés à vol d'oiseau, avec une marche à 4,5 km/h, un facteur de détour de 1,3 et 5 min par arrêt. L'itinéraire réel dans les rues est ensuite demandé au moteur **OSRM** (Luxen & Vetter, 2011), sur le serveur public de l'association FOSSGIS. Le code est dans `js/route.js`.
 
 ---
 
-## 2. Lancer l'application
+## 3. Lancer l'application
 
-Aucune compilation n'est nécessaire : ce sont des fichiers HTML, CSS et JavaScript « nus ».
+**Prérequis :** Node.js **22.13 ou plus récent**. C'est tout : aucune dépendance à installer, la base de données SQLite est intégrée à Node.
 
-### Sur votre ordinateur
 ```bash
 git clone https://github.com/dxtsy7t2hx-commits/bibliorue.git
 cd bibliorue
-npm start            # ou : python3 -m http.server 8080
+ADMIN_EMAILS=vous@exemple.fr npm start
 ```
-Ouvrez ensuite <http://localhost:8080>.
+Ouvrez <http://localhost:8080>. Les données sont stockées dans `data/bibliorue.db`. Les variables de configuration sont décrites dans `.env.example`.
 
-Un serveur web local est nécessaire : ouvrir `index.html` par double-clic ne suffit pas, car les navigateurs bloquent alors les modules JavaScript et le service worker.
+### Mise en ligne
+L'application a besoin d'un **serveur Node.js avec un disque persistant**. Sans disque persistant, la base de données serait effacée à chaque redémarrage. GitHub Pages ne convient donc plus : il ne sert que des fichiers fixes, sans serveur.
 
-### En ligne (gratuit) avec GitHub Pages
-1. Sur GitHub, ouvrez **Settings → Pages**.
-2. Dans **Source**, choisissez **GitHub Actions**.
-3. Fusionnez ce travail dans la branche `main`.
-
-Le workflow `.github/workflows/pages.yml` lance alors les tests puis publie le site à l'adresse `https://dxtsy7t2hx-commits.github.io/bibliorue/`.
-
-### L'installer sur un téléphone
-Ouvrez l'adresse dans le navigateur du téléphone :
-- **Android (Chrome)** : menu ⋮ → *Installer l'application* ;
-- **iPhone (Safari)** : bouton Partager → *Sur l'écran d'accueil*.
-
-L'application s'ouvre ensuite en plein écran, comme une application native. C'est le principe d'une **PWA** (*Progressive Web App*, « application web progressive ») : un site web qui, grâce à un fichier *manifest* et un *service worker*, peut s'installer et fonctionner hors ligne.
-
----
-
-## 3. Organisation du code
-
+Avec Docker, sur un hébergeur qui accepte les images Docker et les volumes (Fly.io, Railway, Render avec disque, un VPS…) :
+```bash
+docker build -t bibliorue .
+docker run -p 8080:8080 -v bibliorue-data:/data -e ADMIN_EMAILS=vous@exemple.fr bibliorue
 ```
-index.html              structure de la page (4 onglets + 2 fenêtres de dialogue)
-css/style.css           mise en forme (mobile d'abord, thème sombre automatique)
-js/app.js               interface : carte Leaflet, affichage, événements
-js/store.js             modèle de données, persistance, recherche, import/export
-js/geo.js               calcul de distance (haversine)
-js/isbn.js              validation des ISBN-10/13 (clé de contrôle) et conversion 10 → 13
-js/overpass.js          requête vers OpenStreetMap via l'API Overpass (avec serveurs de secours)
-js/openlibrary.js       fiche bibliographique à partir d'un ISBN
-sw.js                   service worker (cache hors ligne)
-manifest.webmanifest    métadonnées d'installation (nom, icônes, couleurs)
-icons/                  icônes de l'application
-tests/                  tests unitaires (node:test, sans dépendance)
-.github/workflows/      tests automatiques + déploiement GitHub Pages
-```
+En production, servez l'application **en HTTPS**. Les hébergeurs cités le font automatiquement. C'est nécessaire pour trois choses : la géolocalisation, le scan par caméra et la sécurité des cookies de session.
 
-**Choix techniques.** Il n'y a ni framework ni dépendance à installer : seule la bibliothèque cartographique **Leaflet 1.9.4** est chargée depuis un CDN. Son intégrité est vérifiée par une empreinte SRI (*Subresource Integrity* : le navigateur refuse le fichier s'il a été modifié). La logique métier (`store`, `geo`, `isbn`, `overpass`, `openlibrary`) n'utilise pas le DOM, ce qui permet de la tester avec Node.js.
+**Sauvegarde :** il suffit de copier le fichier `bibliorue.db`. Faites-le régulièrement.
 
 ### Tests
 ```bash
 npm test
 ```
-Les 14 tests couvrent :
-- la validation des ISBN ;
-- les distances ;
-- l'analyse des réponses d'OpenStreetMap et d'Open Library ;
-- le basculement vers un serveur de secours ;
-- le cycle dépôt → emprunt → redépôt ;
-- la recherche sans accents ;
-- la persistance ;
-- l'import/export et la résistance aux fichiers corrompus.
+Il y a 28 tests automatiques :
+- l'API : comptes, droits, doublons, livres, modération, protection CSRF, suppression de compte, limitation des tentatives de connexion ;
+- l'algorithme de balade ;
+- les ISBN, les distances, l'analyse des réponses d'OpenStreetMap et d'Open Library.
 
-### Format des données (export JSON, `version: 1`)
-```json
-{
-  "version": 1,
-  "boxes":  { "<id>": { "name": "…", "lat": 45.76, "lon": 4.83, "source": "local|osm", "osmId": "node/123", "address": "…", "description": "…" } },
-  "books":  { "<id>": { "boxId": "<id>", "title": "…", "authors": "…", "isbn": "978…", "status": "available|taken", "addedAt": "ISO-8601", "takenAt": null } },
-  "events": [ { "type": "book_deposited|book_taken|box_added|box_removed", "at": "ISO-8601", "boxId": "…", "bookId": "…", "title": "…" } ]
-}
+---
+
+## 4. Organisation du code
+
+```
+server/index.js     démarrage du serveur HTTP
+server/app.js       API REST + service des fichiers de l'interface
+server/auth.js      mots de passe (scrypt), sessions, limitation de débit
+server/db.js        schéma SQLite (users, sessions, boxes, books, events, reports)
+index.html, css/    interface (mobile d'abord, thème sombre automatique)
+js/app.js           logique de l'interface (carte Leaflet, fiches, balade, compte)
+js/api.js           client de l'API
+js/route.js         conseiller de balade + itinéraire OSRM
+js/geo.js, isbn.js, overpass.js, openlibrary.js   modules utilitaires (partagés client/serveur)
+sw.js, manifest.webmanifest                       application installable et hors ligne
+tests/              tests node:test
+Dockerfile          image de production
 ```
 
+### Sécurité et vie privée
+- **Mots de passe** hachés avec **scrypt** (Percival, 2009). Le hachage transforme le mot de passe de façon irréversible ; le sel aléatoire empêche de comparer deux comptes entre eux.
+- **Sessions** : jeton aléatoire de 256 bits, placé dans un cookie `HttpOnly` (illisible par un script de la page) et `SameSite=Lax`. Seule l'empreinte du jeton est stockée en base.
+- **Protection CSRF** (attaque où un autre site déclenche une action à votre insu) : les écritures exigent du JSON et une origine identique à celle du site.
+- **En-têtes de sécurité** : politique de sécurité du contenu (CSP) et interdiction d'afficher le site dans un cadre.
+- **Échappement systématique** des textes affichés, pour empêcher l'injection de code (XSS).
+- **Limitation des tentatives** : connexion et inscription limitées par adresse IP, écritures limitées par compte.
+- **L'e-mail n'est jamais public.** Seul le nom choisi apparaît, et un pseudonyme est possible.
+- **Droit à l'effacement** (RGPD, art. 17) : « Supprimer mon compte » efface le compte. Les boîtes et livres ajoutés restent sur la carte commune, sans nom.
+
 ---
 
-## 4. Limites connues et pistes d'évolution
+## 5. À faire avant une ouverture au public
 
-- **Données locales, non partagées.** Les livres que vous signalez ne sont visibles que sur votre appareil, ou chez ceux à qui vous envoyez l'export. Un inventaire partagé en temps réel entre tous les utilisateurs demanderait un serveur avec une base de données et une modération (risques de spam et de fausses informations). C'est l'évolution naturelle de l'application.
-- **Inventaire déclaratif.** Le contenu réel d'une boîte change sans cesse. La liste reflète ce que les utilisateurs ont signalé, avec sa date, et non une vérité garantie.
-- **Contribuer à OpenStreetMap.** Une boîte ajoutée dans Bibliorue n'est pas envoyée à OSM. Pour la rendre visible de tous, ajoutez-la sur <https://www.openstreetmap.org> avec l'étiquette `amenity=public_bookcase`.
-- **Services publics gratuits.** Overpass, Open Library et les tuiles OSM sont gérés par des bénévoles ou des associations. Ils peuvent être lents ou saturés : c'est pourquoi deux serveurs Overpass de secours sont prévus. Pour un usage intensif, la politique d'usage des tuiles OSM demande de passer à un fournisseur dédié (OpenStreetMap Foundation, s.d.).
-- **Lecteur de code-barres.** L'API `BarcodeDetector` n'existe pas encore dans tous les navigateurs, notamment Safari et Firefox (MDN, s.d.). La saisie manuelle de l'ISBN reste toujours possible.
+1. **Mentions légales et politique de confidentialité.** Le site conserve des e-mails : le RGPD s'applique. Il faut indiquer qui est responsable du traitement, à quoi servent les données et combien de temps on les garde (CNIL, s.d.).
+2. **Vérification de l'e-mail et mot de passe oublié.** Ces fonctions ne sont pas encore faites, car elles exigent un service d'envoi d'e-mails. D'ici là, un mot de passe oublié ne peut pas être récupéré.
+3. **Vérification des lieux culturels.** Aujourd'hui, l'inscription « lieu culturel » est déclarative : n'importe qui peut cocher la case. Un badge « vérifié », attribué par un modérateur, éviterait les usurpations.
+4. **Photos des boîtes**, très utiles pour les reconnaître sur place. Elles demandent du stockage et une modération des images.
+5. **Contribution en retour à OpenStreetMap.** Les boîtes ajoutées ici n'y sont pas envoyées automatiquement.
+6. **Montée en charge.** Les serveurs publics Overpass, OSRM et les tuiles OSM sont gérés par des bénévoles et ont des règles d'usage (OpenStreetMap Foundation, s.d.). Avec beaucoup d'utilisateurs, il faudra un fournisseur de tuiles et d'itinéraires dédié.
 
 ---
 
-## 5. Sources (APA 7)
+## 6. Sources (APA 7)
 
-Agafonkin, V. (s.d.). *Leaflet: An open-source JavaScript library for mobile-friendly interactive maps* (version 1.9.4) [Logiciel]. https://leafletjs.com/
+CNIL. (s.d.). *RGPD : par où commencer*. Consulté le 11 novembre 2026, à l'adresse https://www.cnil.fr/fr/rgpd-par-ou-commencer
+
+Croes, G. A. (1958). A method for solving traveling-salesman problems. *Operations Research, 6*(6), 791–812. https://doi.org/10.1287/opre.6.6.791
+
+data.gouv.fr. (s.d.). *Boîtes à livres* [Jeu de données]. Consulté le 11 novembre 2026, à l'adresse https://data.gouv.fr/en/datasets/boites-a-livres
+
+Golden, B. L., Levy, L., & Vohra, R. (1987). The orienteering problem. *Naval Research Logistics, 34*(3), 307–318. https://doi.org/10.1002/1520-6750(198706)34:3<307::AID-NAV3220340302>3.0.CO;2-D
 
 Internet Archive. (s.d.). *Open Library Books API*. Consulté le 11 novembre 2026, à l'adresse https://openlibrary.org/dev/docs/api/books
 
-International ISBN Agency. (2017). *ISBN users' manual* (7ᵉ éd.). https://www.isbn-international.org/content/isbn-users-manual/29
-
 Little Free Library. (s.d.). *History*. Consulté le 11 novembre 2026, à l'adresse https://littlefreelibrary.org/history/
 
-MDN contributors. (s.d.). *BarcodeDetector*. MDN Web Docs. Consulté le 11 novembre 2026, à l'adresse https://developer.mozilla.org/en-US/docs/Web/API/BarcodeDetector
+Luxen, D., & Vetter, C. (2011). Real-time routing with OpenStreetMap data. In *Proceedings of the 19th ACM SIGSPATIAL International Conference on Advances in Geographic Information Systems* (pp. 513–516). ACM. https://doi.org/10.1145/2093973.2094062
 
 Moritz, H. (2000). Geodetic Reference System 1980. *Journal of Geodesy, 74*(1), 128–133. https://doi.org/10.1007/s001900050278
-
-Olbricht, R. (s.d.). *Overpass API user's manual*. Consulté le 11 novembre 2026, à l'adresse https://dev.overpass-api.de/overpass-doc/en/
-
-Open Data Commons. (s.d.). *Open Database License (ODbL) v1.0*. https://opendatacommons.org/licenses/odbl/
 
 OpenStreetMap Foundation. (s.d.). *Tile usage policy*. Consulté le 11 novembre 2026, à l'adresse https://operations.osmfoundation.org/policies/tiles/
 
 OpenStreetMap Wiki contributors. (s.d.). *Tag:amenity=public_bookcase*. OpenStreetMap Wiki. Consulté le 11 novembre 2026, à l'adresse https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dpublic_bookcase
 
+Outils Tice. (2020). *Les meilleurs sites pour trouver des boîtes à livres*. https://outilstice.com/sites-pour-trouver-des-boites-a-livres/
+
+Percival, C. (2009). *Stronger key derivation via sequential memory-hard functions* [Communication]. BSDCan'09, Ottawa, Canada. https://www.tarsnap.com/scrypt/scrypt.pdf
+
+Région Île-de-France. (s.d.). *La carte des 100 boîtes à livres Région Île-de-France dans les gares*. Consulté le 11 novembre 2026, à l'adresse https://www.iledefrance.fr/toutes-les-actualites/la-carte-des-100-boites-livres-region-ile-de-france-dans-les-gares
+
+Ville de Paris. (s.d.). *Où sont les boîtes à livres à Paris ?* Consulté le 11 novembre 2026, à l'adresse https://www.paris.fr/pages/ou-sont-les-boites-a-livres-a-paris-25227
+
 ---
 
-Données cartographiques © contributeurs OpenStreetMap, sous licence ODbL. Code sous licence MIT (voir `LICENSE`).
+Données cartographiques © contributeurs OpenStreetMap (ODbL). Code sous licence MIT (voir `LICENSE`).

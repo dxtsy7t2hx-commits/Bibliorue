@@ -1,9 +1,8 @@
-// Service worker : met en cache l'interface pour un usage hors ligne.
-// Les tuiles de carte et les API (Overpass, Open Library) restent en ligne.
-const CACHE = 'bibliorue-v1.0.0';
+// Service worker : interface disponible hors ligne et dernière carte consultée en secours.
+const CACHE = 'bibliorue-v2.0.0';
 const SHELL = [
   './', 'index.html', 'css/style.css', 'manifest.webmanifest',
-  'js/app.js', 'js/store.js', 'js/geo.js', 'js/isbn.js', 'js/overpass.js', 'js/openlibrary.js',
+  'js/app.js', 'js/api.js', 'js/geo.js', 'js/isbn.js', 'js/overpass.js', 'js/openlibrary.js', 'js/route.js',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
@@ -25,15 +24,28 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  const isShell = url.origin === location.origin || url.hostname === 'unpkg.com';
-  if (!isShell) return; // API et tuiles : réseau direct
-  // « Réseau d'abord, cache en secours » : toujours la dernière version quand on est en ligne.
+  const sameOrigin = url.origin === location.origin;
+  // Seules les lectures publiques de la carte sont gardées en secours (jamais /api/me ni l'admin).
+  const cacheableApi = sameOrigin && /^\/api\/(boxes|activity)/.test(url.pathname);
+  const isShell = (sameOrigin && !url.pathname.startsWith('/api/')) || url.hostname === 'unpkg.com';
+  if (!isShell && !cacheableApi) return;
+  // « Réseau d'abord, cache en secours » : toujours les données fraîches quand on est en ligne.
   e.respondWith(
     fetch(req)
       .then((res) => {
         if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
         return res;
       })
-      .catch(() => caches.match(req, { ignoreSearch: true }).then((r) => r || caches.match('index.html'))),
+      .catch(async () => {
+        const hit = await caches.match(req, { ignoreSearch: !cacheableApi });
+        if (hit) return hit;
+        if (cacheableApi) {
+          // Hors ligne et zone jamais consultée : on renvoie la dernière liste connue, quelle qu'elle soit.
+          const keys = await (await caches.open(CACHE)).keys();
+          const any = keys.find((k) => new URL(k.url).pathname === url.pathname);
+          if (any) return caches.match(any);
+        }
+        return caches.match('index.html');
+      }),
   );
 });
