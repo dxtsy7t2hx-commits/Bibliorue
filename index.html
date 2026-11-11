@@ -2,11 +2,13 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <title>Bibliorue</title>
   <meta name="description" content="La carte communautaire des bibliothèques de rue et des lieux culturels du livre, avec des balades de boîte en boîte.">
-  <meta name="theme-color" content="#ebe3d3" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#141a30" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#efe7d8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#131936" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -18,10 +20,9 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://overpass-api.de https://overpass.private.coffee https://overpass.kumi.systems https://openlibrary.org https://covers.openlibrary.org https://routing.openstreetmap.de https://unpkg.com; base-uri 'self'; form-action 'self'">
 </head>
 <body>
+<!-- sprites:start -->
 <!-- Pictogrammes Bibliorue (dessinés pour le projet), tracés vectoriels nets -->
 <svg id="sprite" xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-    <symbol id="pi-star" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M12.00 0.50 L13.76 7.75 L20.13 3.87 L16.25 10.24 L23.50 12.00 L16.25 13.76 L20.13 20.13 L13.76 16.25 L12.00 23.50 L10.24 16.25 L3.87 20.13 L7.75 13.76 L0.50 12.00 L7.75 10.24 L3.87 3.87 L10.24 7.75Z"/></symbol>
-    <symbol id="pi-sparkle" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M12 1.5C12.9 8.2 15.8 11.1 22.5 12 15.8 12.9 12.9 15.8 12 22.5 11.1 15.8 8.2 12.9 1.5 12 8.2 11.1 11.1 8.2 12 1.5Z"/></symbol>
     <symbol id="pi-box" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M3.5 9.6 12 2.8l8.5 6.8v1.2H3.5Z M4.6 10.8h14.8v6.6H4.6Z M6.6 12.2v4h10.8v-4Z M7.6 12.9h1.7v3.3H7.6Z M10 12.5h1.5v3.7H10Z M12.3 13.1l1.5-.4 1 3.5-1.5.4Z M15.3 12.7h1.2v3.5h-1.2Z M10.9 17.4h2.2v4.2h-2.2Z M7.5 21.2c0-.6.5-1 1-1h7c.6 0 1 .4 1 1v1.3h-9Z"/></symbol>
     <symbol id="pi-venue" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M2.8 8.6 12 3l9.2 5.6v.9H2.8Z M10.7 6.9a1.3 1.3 0 1 0 2.6 0 1.3 1.3 0 1 0-2.6 0Z M3.6 10.5h16.8v1.8H3.6Z M5 13.2h2.6v6H5Z M10.7 13.2h2.6v6h-2.6Z M16.4 13.2H19v6h-2.6Z M2.5 20.1h19v2.4h-19Z"/></symbol>
     <symbol id="pi-book" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M1.8 5.4c3.7-1.3 7.2-.9 9.5 1.2V20c-2.3-1.6-5.8-1.9-9.5-.8Z M22.2 5.4c-3.7-1.3-7.2-.9-9.5 1.2V20c2.3-1.6 5.8-1.9 9.5-.8Z M4.2 8.3c1.8-.4 3.6-.2 5 .5v.9c-1.4-.6-3.2-.8-5-.4Z M4.2 11c1.8-.4 3.6-.2 5 .5v.9c-1.4-.6-3.2-.8-5-.4Z M14.8 8.8c1.4-.7 3.2-.9 5-.5v1c-1.8-.4-3.6-.2-5 .4Z"/></symbol>
@@ -43,205 +44,318 @@
     <symbol id="pi-close" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M5.2 3 12 9.8 18.8 3 21 5.2 14.2 12 21 18.8 18.8 21 12 14.2 5.2 21 3 18.8 9.8 12 3 5.2Z"/></symbol>
     <symbol id="pi-door" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M4 2.5h11v19H4Z M11.5 11a1 1 0 1 0 0 2 1 1 0 1 0 0-2Z M17 7.5l5 4.5-5 4.5v-3h-4v-3h4Z"/></symbol>
     <symbol id="pi-heart" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M12 21.2C5 16.6 1.8 13 1.8 8.7 1.8 5.4 4.3 3 7.3 3c2 0 3.6 1 4.7 2.6C13.1 4 14.7 3 16.7 3c3 0 5.5 2.4 5.5 5.7 0 4.3-3.2 7.9-10.2 12.5Z"/></symbol>
+    <symbol id="pi-arrow" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M3 10.6h13.4l-4.7-4.7 2-2L21.8 12l-8.1 8.1-2-2 4.7-4.7H3Z"/></symbol>
+    <symbol id="pi-back" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M21 10.6H7.6l4.7-4.7-2-2L2.2 12l8.1 8.1 2-2-4.7-4.7H21Z"/></symbol>
+    <symbol id="pi-check" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M9.2 16.6 4.6 12l-2 2 6.6 6.6L21.4 8.4l-2-2Z"/></symbol>
+    <symbol id="pi-chev" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M12 7.4l8.6 8.6-2.2 2.2L12 11.8l-6.4 6.4L3.4 16Z"/></symbol>
+    <symbol id="pi-layers" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M12 2 1.5 7.5 12 13l10.5-5.5Z M3.8 11.2 1.5 12.4 12 18l10.5-5.6-2.3-1.2L12 15.5Z M3.8 16 1.5 17.2 12 22.8l10.5-5.6L20.2 16 12 20.3Z"/></symbol>
+    <symbol id="pi-pin" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M12 1.5c-4.6 0-8.2 3.5-8.2 8.1 0 6 8.2 12.9 8.2 12.9s8.2-6.9 8.2-12.9c0-4.6-3.6-8.1-8.2-8.1Z M12 6.3a3.3 3.3 0 1 1 0 6.6 3.3 3.3 0 1 1 0-6.6Z"/></symbol>
 </svg>
+<!-- sprites:end -->
 
+  <!-- ============ ACCUEIL (première visite) : trois écrans à faire glisser ============ -->
+  <div id="onboarding" class="onboarding" hidden role="dialog" aria-modal="true" aria-label="Bienvenue sur Bibliorue">
+    <div class="ob-track" id="ob-track">
+      <section class="ob-slide s-blue grain">
+        <p class="eyebrow">01 — Bienvenue</p>
+        <svg class="ob-illu big-pi" aria-hidden="true"><use href="#pi-box"/></svg>
+        <h2 class="poster">Prenez un livre,<br>laissez un livre.</h2>
+        <p>Les bibliothèques de rue, ces petites boîtes où l'on dépose et emprunte des livres librement, réunies sur une seule carte.</p>
+      </section>
+      <section class="ob-slide s-paper">
+        <p class="eyebrow">02 — Ensemble</p>
+        <svg class="ob-illu big-pi" aria-hidden="true"><use href="#pi-people"/></svg>
+        <h2 class="poster">Une carte tenue<br>par tout le monde.</h2>
+        <p>Chacun ajoute les boîtes qu'il croise et les livres qu'il y voit. Les librairies, médiathèques et cafés-livres y ont leur place, en rouge brique.</p>
+      </section>
+      <section class="ob-slide s-brick grain">
+        <p class="eyebrow">03 — Flâner</p>
+        <svg class="ob-illu big-pi" aria-hidden="true"><use href="#pi-walk"/></svg>
+        <h2 class="poster">De boîte<br>en boîte.</h2>
+        <p>Dites combien de temps vous avez : Bibliorue dessine la balade qui passe par le plus de boîtes.</p>
+      </section>
+    </div>
+    <div class="ob-nav">
+      <div class="dots" id="ob-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+      <button id="ob-skip" class="link" type="button">Passer</button>
+      <button id="ob-next" class="pill solid" type="button">Suivant <svg class="pi"><use href="#pi-arrow"/></svg></button>
+    </div>
+  </div>
+
+  <!-- ============ EN-TÊTE FLOTTANT ============ -->
   <header class="topbar">
-    <a class="brand" href="#map" aria-label="Bibliorue, accueil">
+    <a class="brand glass" href="#map" aria-label="Bibliorue, accueil">
       <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
-        <rect x="2" y="2" width="44" height="44" rx="13" style="fill:var(--blue)"/>
-        <use href="#pi-box" x="9" y="8" width="30" height="30" style="color:var(--on-blue)"/>
-        <use href="#pi-star" x="31" y="-1" width="17" height="17" style="color:var(--brick)"/>
+        <rect x="2" y="2" width="44" height="44" rx="14" style="fill:var(--blue)"/>
+        <use href="#pi-box" x="10" y="9" width="28" height="28" style="color:var(--on-blue)"/>
       </svg>
-      <div>
-        <h1>Bibliorue</h1>
-        <p class="tagline">Les bibliothèques de rue, ensemble</p>
-      </div>
+      <span>Bibliorue</span>
     </a>
-    <button id="btn-account" class="account-btn" type="button"><span class="tile"><svg class="pi"><use href="#pi-user"/></svg></span><span class="label">Connexion</span></button>
+    <button id="btn-account" class="avatar-btn glass" type="button" aria-label="Mon compte"></button>
   </header>
 
+  <p id="setup-warning" class="setup-warning" hidden>Bibliorue n'est pas encore relié à Supabase : complétez <code>js/config.js</code> (TUTORIEL.md, étape 5).</p>
+
   <main>
-    <p id="setup-warning" class="hint" hidden>Bibliorue n'est pas encore relié à Supabase : complétez <code>js/config.js</code> (voir TUTORIEL.md, étape 4).</p>
-    <!-- CARTE -->
+    <!-- ============ CARTE (immersive) ============ -->
     <section id="view-map" class="view active" aria-label="Carte">
-      <div class="intro" id="intro">
-        <svg class="pi deco" aria-hidden="true"><use href="#pi-star"/></svg>
-        <svg class="pi deco2" aria-hidden="true"><use href="#pi-sparkle"/></svg>
-        <h2>Prenez un livre, laissez un livre.</h2>
-        <p>Une carte tenue par celles et ceux qui flânent : les boîtes à livres du coin, ce qu'on y trouve, et des balades pour aller de l'une à l'autre.</p>
-        <div class="steps">
-          <span><i class="tile"><svg class="pi"><use href="#pi-box"/></svg></i>Trouver</span>
-          <span><i class="tile"><svg class="pi"><use href="#pi-book"/></svg></i>Partager</span>
-          <span><i class="tile"><svg class="pi"><use href="#pi-walk"/></svg></i>Flâner</span>
-        </div>
-        <button class="dismiss" id="btn-intro-close" type="button" aria-label="Masquer ce message"><svg class="pi"><use href="#pi-close"/></svg></button>
+      <div id="map" role="application" aria-label="Carte des bibliothèques de rue"></div>
+
+      <div class="map-chips" role="toolbar" aria-label="Filtres de la carte">
+        <button class="chip on" data-filter="all" type="button">Tout</button>
+        <button class="chip" data-filter="street" type="button"><i class="sw street"></i>Rue</button>
+        <button class="chip" data-filter="venue" type="button"><i class="sw venue"></i>Lieux culturels</button>
+        <button class="chip" data-filter="books" type="button"><svg class="pi"><use href="#pi-books"/></svg>Avec des livres</button>
+        <button class="chip" id="btn-osm" type="button" aria-pressed="false"><svg class="pi"><use href="#pi-layers"/></svg>Boîtes OSM</button>
       </div>
 
-      <div class="map-tools">
-        <button id="btn-locate" type="button"><svg class="pi"><use href="#pi-locate"/></svg>Me localiser</button>
-        <button id="btn-osm" type="button" aria-pressed="false"><svg class="pi"><use href="#pi-import"/></svg>Boîtes OSM</button>
-        <button id="btn-add-box" type="button" class="accent"><svg class="pi"><use href="#pi-plus"/></svg>Ajouter une boîte</button>
+      <div class="fabs">
+        <button id="btn-locate" class="fab" type="button" aria-label="Me localiser"><svg class="pi"><use href="#pi-locate"/></svg></button>
+        <button id="btn-add-box" class="fab big" type="button" aria-label="Ajouter une boîte"><svg class="pi"><use href="#pi-plus"/></svg></button>
       </div>
-      <p id="map-hint" class="hint" hidden><svg class="pi"><use href="#pi-star"/></svg>Touchez la carte à l'emplacement exact. <button id="btn-cancel-pick" class="small" type="button">Annuler</button></p>
-      <div id="map" role="application" aria-label="Carte des bibliothèques de rue"></div>
-      <ul class="legend" aria-label="Légende">
-        <li><span class="tile"><svg class="pi"><use href="#pi-box"/></svg></span>Bibliothèque de rue</li>
-        <li><span class="tile brick"><svg class="pi"><use href="#pi-venue"/></svg></span>Lieu culturel</li>
-        <li><span class="tile paper"><svg class="pi"><use href="#pi-box"/></svg></span>Recensée dans OSM, à importer</li>
-        <li><span class="me"></span>Vous</li>
-      </ul>
-      <h2 class="list-title">À deux pas</h2>
-      <ul id="box-list" class="cards"></ul>
+
+      <!-- Mode « placer une boîte » : repère fixe au centre, on déplace la carte dessous -->
+      <div id="pick-ui" class="pick-ui" hidden>
+        <svg class="pick-pin" viewBox="0 0 48 64" aria-hidden="true">
+          <path d="M24 62S4 38 4 22a20 20 0 0 1 40 0c0 16-20 40-20 40z" style="fill:var(--brick)"/>
+          <use href="#pi-box" x="12" y="9" width="24" height="24" style="color:var(--on-brick)"/>
+        </svg>
+        <div class="pick-bar">
+          <p><strong>Déplacez la carte</strong> pour placer le repère exactement sur la boîte.</p>
+          <div class="row">
+            <button id="btn-cancel-pick" class="pill ghost" type="button">Annuler</button>
+            <button id="btn-confirm-pick" class="pill solid" type="button"><svg class="pi"><use href="#pi-check"/></svg>C'est ici</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feuille coulissante -->
+      <div id="sheet" class="sheet" data-state="peek">
+        <button class="sheet-grip" id="sheet-grip" type="button" aria-label="Agrandir ou réduire la liste"><span></span></button>
+        <div class="sheet-head">
+          <div>
+            <p class="eyebrow" id="near-count">À deux pas</p>
+            <h2 class="poster sm">Les boîtes autour</h2>
+          </div>
+          <button class="round ghost" id="sheet-toggle" type="button" aria-label="Agrandir la liste"><svg class="pi"><use href="#pi-chev"/></svg></button>
+        </div>
+        <ul id="box-list" class="cards-rail"></ul>
+        <div class="sheet-foot">
+          <ul class="legend" aria-label="Légende">
+            <li><i class="sw street"></i>Bibliothèque de rue</li>
+            <li><i class="sw venue"></i>Lieu culturel</li>
+            <li><i class="sw osm"></i>À importer d'OSM</li>
+          </ul>
+        </div>
+      </div>
     </section>
 
-    <!-- BALADE -->
-    <section id="view-walk" class="view" aria-label="Balade">
-      <h2>Une balade de boîte en boîte</h2>
-      <p>Dites-nous combien de temps vous avez : Bibliorue choisit les étapes et l'ordre le plus court, à partir de votre position ou du centre de la carte.</p>
-      <form id="walk-form">
-        <div class="row">
-          <label class="field grow"><span>Temps disponible</span>
-            <select name="budget">
-              <option value="30">30 min</option>
-              <option value="60" selected>1 h</option>
-              <option value="90">1 h 30</option>
-              <option value="120">2 h</option>
-              <option value="180">3 h</option>
-              <option value="240">4 h</option>
-            </select></label>
-          <label class="field grow"><span>Départ</span>
-            <select name="start">
-              <option value="gps">Ma position</option>
-              <option value="center">Centre de la carte</option>
-            </select></label>
-        </div>
-        <label class="check"><input type="checkbox" name="loop" checked> Revenir au point de départ</label>
-        <label class="check"><input type="checkbox" name="venues" checked> Passer par les lieux culturels</label>
-        <label class="check"><input type="checkbox" name="withBooks"> Seulement les boîtes où des livres sont signalés</label>
-        <button class="primary" type="submit"><svg class="pi"><use href="#pi-walk"/></svg>Proposer une balade</button>
+    <!-- ============ BALADE ============ -->
+    <section id="view-walk" class="view page" aria-label="Balade">
+      <header class="hero s-blue grain">
+        <p class="eyebrow">Balade</p>
+        <h1 class="poster xl">Tracer<br>ma balade</h1>
+        <svg class="hero-illu big-pi" aria-hidden="true"><use href="#pi-walk"/></svg>
+      </header>
+      <form id="walk-form" class="steps">
+        <fieldset class="step reveal">
+          <legend><span class="num">01</span>Combien de temps avez-vous ?</legend>
+          <div class="choice-row">
+            <label class="choice"><input type="radio" name="budget" value="30"><span>30<small>min</small></span></label>
+            <label class="choice"><input type="radio" name="budget" value="60" checked><span>1<small>h</small></span></label>
+            <label class="choice"><input type="radio" name="budget" value="90"><span>1 h 30</span></label>
+            <label class="choice"><input type="radio" name="budget" value="120"><span>2<small>h</small></span></label>
+            <label class="choice"><input type="radio" name="budget" value="180"><span>3<small>h</small></span></label>
+            <label class="choice"><input type="radio" name="budget" value="240"><span>4<small>h</small></span></label>
+          </div>
+        </fieldset>
+        <fieldset class="step reveal">
+          <legend><span class="num">02</span>D'où partez-vous ?</legend>
+          <div class="choice-cards">
+            <label class="choice-card"><input type="radio" name="start" value="gps" checked><svg class="pi"><use href="#pi-locate"/></svg><span><strong>Ma position</strong><small>là où je suis</small></span></label>
+            <label class="choice-card"><input type="radio" name="start" value="center"><svg class="pi"><use href="#pi-pin"/></svg><span><strong>Centre de la carte</strong><small>là où je regarde</small></span></label>
+          </div>
+        </fieldset>
+        <fieldset class="step reveal">
+          <legend><span class="num">03</span>Vos envies</legend>
+          <div class="toggle-row">
+            <label class="toggle"><input type="checkbox" name="loop" checked><span>Revenir au départ</span></label>
+            <label class="toggle"><input type="checkbox" name="venues" checked><span>Passer par des lieux culturels</span></label>
+            <label class="toggle"><input type="checkbox" name="withBooks"><span>Seulement des boîtes garnies</span></label>
+          </div>
+        </fieldset>
+        <button class="pill solid xl" type="submit"><svg class="pi"><use href="#pi-walk"/></svg>Dessiner ma balade</button>
       </form>
       <div id="walk-result" role="status"></div>
     </section>
 
-    <!-- LIVRES -->
-    <section id="view-search" class="view" aria-label="Rechercher un livre">
-      <h2>Trouver un livre</h2>
-      <label class="field">
-        <span>Titre, auteur ou ISBN</span>
-        <input id="search-input" type="search" autocomplete="off" placeholder="ex. Annie Ernaux">
-      </label>
-      <ul id="search-results" class="cards"></ul>
+    <!-- ============ LIVRES ============ -->
+    <section id="view-search" class="view page" aria-label="Rechercher un livre">
+      <header class="hero s-paper">
+        <p class="eyebrow">Livres</p>
+        <h1 class="poster xl">Trouver<br>un livre</h1>
+        <svg class="hero-illu big-pi" aria-hidden="true"><use href="#pi-search"/></svg>
+      </header>
+      <div class="searchbar">
+        <svg class="pi"><use href="#pi-search"/></svg>
+        <input id="search-input" type="search" autocomplete="off" placeholder="Titre, auteur ou ISBN" aria-label="Titre, auteur ou ISBN">
+      </div>
+      <div class="suggest" id="search-suggest">
+        <span class="eyebrow">Essayez</span>
+        <button class="chip" type="button" data-q="Annie Ernaux">Annie Ernaux</button>
+        <button class="chip" type="button" data-q="Camus">Camus</button>
+        <button class="chip" type="button" data-q="Harry Potter">Harry Potter</button>
+        <button class="chip" type="button" data-q="Simenon">Simenon</button>
+      </div>
+      <ul id="search-results" class="book-grid"></ul>
     </section>
 
-    <!-- COMMUNAUTÉ -->
-    <section id="view-community" class="view about" aria-label="Communauté">
-      <h2>La communauté</h2>
-      <div id="stats" class="stats"></div>
-      <h3>Dernières contributions</h3>
-      <ul id="events" class="events"></ul>
-      <div class="stars-sep" aria-hidden="true"><span></span><span></span><span></span></div>
-      <h3>À propos</h3>
-      <p>Une <strong>bibliothèque de rue</strong> (ou « boîte à livres ») est un meuble en libre accès dans l'espace public : on y dépose et on y prend des livres gratuitement. Bibliorue est une carte <strong>tenue par ses utilisateurs</strong>. Tout le monde peut la consulter ; il faut un compte pour ajouter une boîte ou un livre. Les <strong>lieux culturels</strong> (bibliothèques, librairies, cafés-livres, associations…) peuvent s'inscrire comme tels et apparaissent en rouge brique.</p>
-      <p class="small">Fond de carte et boîtes « OSM » © contributeurs OpenStreetMap (ODbL). Fiches livres : Open Library. Itinéraires : OSRM / FOSSGIS. Polices Lilita One et Nunito (SIL OFL). <button id="btn-export" type="button" class="small"><svg class="pi"><use href="#pi-import"/></svg>Télécharger la carte (GeoJSON, données ouvertes)</button></p>
+    <!-- ============ COMMUNAUTÉ ============ -->
+    <section id="view-community" class="view page" aria-label="Communauté">
+      <header class="hero s-brick grain">
+        <p class="eyebrow">Communauté</p>
+        <h1 class="poster xl">Ce qu'on<br>partage</h1>
+        <svg class="hero-illu big-pi" aria-hidden="true"><use href="#pi-people"/></svg>
+      </header>
+      <div id="stats" class="bento"></div>
+      <h2 class="section-title reveal">Dernières contributions</h2>
+      <ol id="events" class="feed"></ol>
+      <section class="about reveal">
+        <h2 class="section-title">À propos</h2>
+        <p>Une <strong>bibliothèque de rue</strong> (ou « boîte à livres ») est un meuble en libre accès dans l'espace public : on y dépose et on y prend des livres gratuitement. Bibliorue est une carte <strong>tenue par ses utilisateurs</strong>. Tout le monde peut la consulter ; il faut un compte pour ajouter une boîte ou un livre. Les <strong>lieux culturels</strong> (bibliothèques, librairies, cafés-livres, associations…) peuvent s'inscrire comme tels et apparaissent en rouge brique.</p>
+        <p class="small">Fond de carte et boîtes « OSM » © contributeurs OpenStreetMap (ODbL). Fiches livres : Open Library. Itinéraires : OSRM / FOSSGIS. Polices Lilita One et Nunito (SIL OFL).</p>
+        <button id="btn-export" type="button" class="pill"><svg class="pi"><use href="#pi-import"/></svg>Télécharger la carte (GeoJSON)</button>
+        <button id="btn-replay-intro" type="button" class="link">Revoir l'accueil</button>
+      </section>
     </section>
 
-    <!-- COMPTE -->
-    <section id="view-account" class="view" aria-label="Compte">
+    <!-- ============ COMPTE ============ -->
+    <section id="view-account" class="view page" aria-label="Compte">
       <div id="account-out">
-        <h2>Rejoindre Bibliorue</h2>
-        <p>Un compte est nécessaire pour ajouter une boîte, signaler un livre ou indiquer qu'on l'a pris. Regarder la carte reste libre.</p>
+        <header class="hero s-paper compact">
+          <p class="eyebrow">Compte</p>
+          <h1 class="poster xl">Rejoindre<br>la carte</h1>
+          <svg class="hero-illu big-pi" aria-hidden="true"><use href="#pi-box"/></svg>
+        </header>
+        <p class="lead">Regarder la carte est libre. Un compte sert à ajouter une boîte, signaler un livre ou dire qu'on l'a pris.</p>
         <div class="segmented" role="tablist">
           <button type="button" role="tab" data-auth="login" aria-selected="true">J'ai un compte</button>
           <button type="button" role="tab" data-auth="register" aria-selected="false">Créer un compte</button>
         </div>
-        <form id="login-form" class="auth-form">
+
+        <form id="login-form" class="card-form">
           <label class="field"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
           <label class="field"><span>Mot de passe</span><input name="password" type="password" autocomplete="current-password" required></label>
           <p class="msg" role="status"></p>
-          <div class="row">
-            <button class="primary" type="submit"><svg class="pi"><use href="#pi-door"/></svg>Se connecter</button>
-            <button class="ghost small" id="btn-forgot" type="button">Mot de passe oublié ?</button>
-          </div>
+          <button class="pill solid xl" type="submit">Se connecter <svg class="pi"><use href="#pi-arrow"/></svg></button>
+          <button class="link" id="btn-forgot" type="button">Mot de passe oublié ?</button>
         </form>
-        <form id="register-form" class="auth-form" hidden>
-          <fieldset class="types">
-            <legend>Je m'inscris en tant que</legend>
-            <label class="type-card"><input type="radio" name="accountType" value="person" checked>
-              <span class="tile"><svg class="pi"><use href="#pi-user"/></svg></span>
-              <span><strong>Particulier</strong><small>Je partage les boîtes et les livres que je croise.</small></span></label>
-            <label class="type-card venue"><input type="radio" name="accountType" value="culture">
-              <span class="tile brick"><svg class="pi"><use href="#pi-venue"/></svg></span>
-              <span><strong>Lieu culturel</strong><small>Bibliothèque, librairie, café-livres, association… Mon lieu apparaît en rouge brique sur la carte.</small></span></label>
-          </fieldset>
-          <label class="field"><span id="name-label">Nom affiché (pseudonyme possible)</span><input name="displayName" required maxlength="80" autocomplete="nickname"></label>
-          <div id="venue-fields" hidden>
-            <label class="field"><span>Type de lieu</span>
-              <select name="venueKind">
-                <option value="bibliotheque">Bibliothèque</option>
-                <option value="mediatheque">Médiathèque</option>
-                <option value="librairie">Librairie</option>
-                <option value="cafe">Café-livres</option>
-                <option value="association">Association</option>
-                <option value="centre_culturel">Centre culturel</option>
-                <option value="ecole">École / université</option>
-                <option value="autre">Autre</option>
-              </select></label>
-            <label class="field"><span>Site web (facultatif)</span><input name="website" type="text" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="300" placeholder="monsite.fr"></label>
+
+        <form id="register-form" class="card-form" hidden novalidate>
+          <div class="stepper" aria-live="polite">
+            <svg class="ring" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="19"/><circle id="reg-ring" cx="22" cy="22" r="19" pathLength="100"/></svg>
+            <span id="reg-count">01</span><span class="of">/03</span>
           </div>
-          <label class="field"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
-          <label class="field"><span>Mot de passe (8 caractères minimum)</span><input name="password" type="password" minlength="8" autocomplete="new-password" required></label>
-          <p class="small">Votre e-mail n'est jamais affiché. Seul votre nom apparaît à côté de vos contributions.</p>
+          <fieldset class="reg-step" data-step="1">
+            <legend class="poster sm">Qui êtes-vous ?</legend>
+            <div class="types">
+              <label class="type-card"><input type="radio" name="accountType" value="person" checked>
+                <svg class="type-illu big-pi" aria-hidden="true"><use href="#pi-walk"/></svg>
+                <span><strong>Un particulier</strong><small>Je partage les boîtes et les livres que je croise.</small></span></label>
+              <label class="type-card venue"><input type="radio" name="accountType" value="culture">
+                <svg class="type-illu big-pi" aria-hidden="true"><use href="#pi-venue"/></svg>
+                <span><strong>Un lieu culturel</strong><small>Bibliothèque, librairie, café-livres, association… Mon lieu apparaît en rouge brique.</small></span></label>
+            </div>
+          </fieldset>
+          <fieldset class="reg-step" data-step="2" hidden>
+            <legend class="poster sm" id="name-legend">Votre nom sur la carte</legend>
+            <label class="field"><span id="name-label">Nom affiché (pseudonyme possible)</span><input name="displayName" required maxlength="80" autocomplete="nickname"></label>
+            <div id="venue-fields" hidden>
+              <label class="field"><span>Type de lieu</span>
+                <select name="venueKind">
+                  <option value="bibliotheque">Bibliothèque</option>
+                  <option value="mediatheque">Médiathèque</option>
+                  <option value="librairie">Librairie</option>
+                  <option value="cafe">Café-livres</option>
+                  <option value="association">Association</option>
+                  <option value="centre_culturel">Centre culturel</option>
+                  <option value="ecole">École / université</option>
+                  <option value="autre">Autre</option>
+                </select></label>
+              <label class="field"><span>Site web (facultatif)</span><input name="website" type="text" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="300" placeholder="monsite.fr"></label>
+            </div>
+          </fieldset>
+          <fieldset class="reg-step" data-step="3" hidden>
+            <legend class="poster sm">Votre accès</legend>
+            <label class="field"><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label>
+            <label class="field"><span>Mot de passe (8 caractères minimum)</span><input name="password" type="password" minlength="8" autocomplete="new-password" required></label>
+            <p class="small">Votre e-mail n'est jamais affiché. Seul votre nom apparaît à côté de vos contributions.</p>
+          </fieldset>
           <p class="msg" role="status"></p>
-          <button class="primary" type="submit"><svg class="pi"><use href="#pi-star"/></svg>Créer mon compte</button>
+          <div class="row between">
+            <button class="pill ghost" id="reg-back" type="button" hidden><svg class="pi"><use href="#pi-back"/></svg>Retour</button>
+            <button class="pill solid" id="reg-next" type="button">Suivant <svg class="pi"><use href="#pi-arrow"/></svg></button>
+            <button class="pill solid" id="reg-submit" type="submit" hidden>Créer mon compte <svg class="pi"><use href="#pi-check"/></svg></button>
+          </div>
         </form>
       </div>
 
       <div id="account-in" hidden>
-        <h2 id="me-name"></h2>
-        <p id="me-type"></p>
-        <div id="me-stats" class="stats"></div>
-        <div id="me-venue-cta" class="panel venue-cta" hidden>
-          <p><strong>Placez votre lieu sur la carte.</strong> En tant que lieu culturel, vous apparaissez en rouge brique : les promeneurs vous verront et pourront vous inclure dans leur balade.</p>
-          <button id="btn-add-venue" type="button" class="accent"><svg class="pi"><use href="#pi-venue"/></svg>Ajouter mon lieu</button>
+        <header class="profile-hero grain" id="profile-hero">
+          <span class="big-avatar" id="me-initial"></span>
+          <h1 class="poster xl" id="me-name"></h1>
+          <p id="me-type"></p>
+        </header>
+        <div id="me-stats" class="bento two"></div>
+        <div id="me-venue-cta" class="cta-card s-brick grain" hidden>
+          <svg class="cta-illu big-pi" aria-hidden="true"><use href="#pi-venue"/></svg>
+          <div>
+            <h2 class="poster sm">Placez votre lieu sur la carte</h2>
+            <p>Il apparaîtra en rouge brique, et les promeneurs pourront l'inclure dans leur balade.</p>
+            <button id="btn-add-venue" type="button" class="pill paper"><svg class="pi"><use href="#pi-venue"/></svg>Ajouter mon lieu</button>
+          </div>
         </div>
-        <div class="stars-sep" aria-hidden="true"><span></span><span></span><span></span></div>
-        <div class="row">
-          <button id="btn-logout" type="button"><svg class="pi"><use href="#pi-door"/></svg>Se déconnecter</button>
-          <button id="btn-delete-me" type="button" class="danger"><svg class="pi"><use href="#pi-trash"/></svg>Supprimer mon compte</button>
-        </div>
-        <section id="admin" hidden>
-          <h3>Modération : signalements</h3>
-          <ul id="reports" class="events"></ul>
-          <h3>Sauvegarde</h3>
-          <p class="small">L'offre gratuite de Supabase ne fait pas de sauvegarde automatique : téléchargez régulièrement une copie complète (sans e-mails ni mots de passe).</p>
-          <button id="btn-backup" type="button"><svg class="pi"><use href="#pi-import"/></svg>Télécharger une sauvegarde complète</button>
+        <section id="admin" class="admin" hidden>
+          <h2 class="section-title">Modération</h2>
+          <ul id="reports" class="feed"></ul>
+          <div class="note">
+            <p class="small">L'offre gratuite de Supabase ne fait pas de sauvegarde automatique : téléchargez régulièrement une copie complète (sans e-mails ni mots de passe).</p>
+            <button id="btn-backup" type="button" class="pill"><svg class="pi"><use href="#pi-import"/></svg>Télécharger une sauvegarde</button>
+          </div>
         </section>
+        <div class="row account-actions">
+          <button id="btn-logout" type="button" class="pill"><svg class="pi"><use href="#pi-door"/></svg>Se déconnecter</button>
+          <button id="btn-delete-me" type="button" class="link danger">Supprimer mon compte</button>
+        </div>
       </div>
     </section>
   </main>
 
+  <!-- ============ NAVIGATION ============ -->
   <nav class="tabbar" aria-label="Navigation principale">
-    <button data-view="view-map" class="active" type="button"><span class="tile"><svg class="pi"><use href="#pi-box"/></svg></span>Carte</button>
-    <button data-view="view-walk" type="button"><span class="tile"><svg class="pi"><use href="#pi-walk"/></svg></span>Balade</button>
-    <button data-view="view-search" type="button"><span class="tile"><svg class="pi"><use href="#pi-books"/></svg></span>Livres</button>
-    <button data-view="view-community" type="button"><span class="tile"><svg class="pi"><use href="#pi-people"/></svg></span>Communauté</button>
+    <button data-view="view-map" class="active" type="button"><svg class="pi"><use href="#pi-box"/></svg><span>Carte</span></button>
+    <button data-view="view-walk" type="button"><svg class="pi"><use href="#pi-walk"/></svg><span>Balade</span></button>
+    <button data-view="view-search" type="button"><svg class="pi"><use href="#pi-books"/></svg><span>Livres</span></button>
+    <button data-view="view-community" type="button"><svg class="pi"><use href="#pi-people"/></svg><span>Communauté</span></button>
   </nav>
 
-  <!-- Fiche d'une boîte -->
-  <dialog id="box-dialog">
-    <form method="dialog" class="dialog-head">
-      <h2 id="box-title"></h2>
-      <button class="close" aria-label="Fermer"><svg class="pi"><use href="#pi-close"/></svg></button>
-    </form>
-    <div id="box-body"></div>
-    <details id="add-book" class="panel">
-      <summary><svg class="pi"><use href="#pi-plus"/></svg>J'ai déposé un livre ici</summary>
-      <form id="book-form" autocomplete="off">
+  <!-- ============ FICHE D'UNE BOÎTE (panneau plein écran) ============ -->
+  <dialog id="box-dialog" class="panel">
+    <div class="box-hero grain" id="box-hero">
+      <form method="dialog"><button class="round glass close" aria-label="Fermer"><svg class="pi"><use href="#pi-close"/></svg></button></form>
+      <svg class="box-illu big-pi" aria-hidden="true"><use id="box-illu-use" href="#pi-box"/></svg>
+      <p class="eyebrow" id="box-eyebrow"></p>
+      <h2 class="poster lg" id="box-title"></h2>
+    </div>
+    <div id="box-body" class="panel-body"></div>
+    <details id="add-book" class="drawer">
+      <summary class="pill solid xl"><svg class="pi"><use href="#pi-plus"/></svg>J'ai déposé un livre ici</summary>
+      <form id="book-form" autocomplete="off" class="card-form">
         <div class="isbn-row">
           <label class="field grow"><span>ISBN (au dos, sous le code-barres)</span>
             <input name="isbn" inputmode="numeric" placeholder="978…"></label>
-          <button type="button" id="btn-isbn">Compléter</button>
-          <button type="button" id="btn-scan" hidden><svg class="pi"><use href="#pi-camera"/></svg>Scanner</button>
+          <button type="button" class="pill" id="btn-isbn">Compléter</button>
+          <button type="button" class="pill" id="btn-scan" hidden><svg class="pi"><use href="#pi-camera"/></svg>Scanner</button>
         </div>
         <video id="scan-video" playsinline muted hidden></video>
         <label class="field"><span>Titre *</span><input name="title" required maxlength="200"></label>
@@ -253,35 +367,38 @@
         <label class="field"><span>Remarque (état, genre…)</span><input name="note" maxlength="300"></label>
         <input type="hidden" name="coverUrl">
         <p id="book-msg" class="msg" role="status"></p>
-        <button class="primary" type="submit"><svg class="pi"><use href="#pi-book"/></svg>Enregistrer le dépôt</button>
+        <button class="pill solid" type="submit"><svg class="pi"><use href="#pi-book"/></svg>Enregistrer le dépôt</button>
       </form>
     </details>
   </dialog>
 
-  <!-- Ajout / modification d'une boîte -->
-  <dialog id="boxform-dialog">
-    <form method="dialog" class="dialog-head">
-      <h2 id="boxform-title">Nouvelle bibliothèque de rue</h2>
-      <button class="close" aria-label="Fermer"><svg class="pi"><use href="#pi-close"/></svg></button>
-    </form>
-    <form id="boxform">
+  <!-- ============ AJOUT / MODIFICATION D'UNE BOÎTE ============ -->
+  <dialog id="boxform-dialog" class="panel">
+    <div class="form-head">
+      <h2 class="poster sm" id="boxform-title">Nouvelle bibliothèque de rue</h2>
+      <form method="dialog"><button class="round ghost close" aria-label="Fermer"><svg class="pi"><use href="#pi-close"/></svg></button></form>
+    </div>
+    <form id="boxform" class="card-form">
       <input type="hidden" name="id">
       <input type="hidden" name="osmId">
-      <fieldset id="category-field" class="types" hidden>
+      <fieldset id="category-field" class="types two" hidden>
         <legend>Type</legend>
-        <label class="type-card"><input type="radio" name="category" value="street" checked><span class="tile"><svg class="pi"><use href="#pi-box"/></svg></span><span><strong>Bibliothèque de rue</strong></span></label>
-        <label class="type-card venue"><input type="radio" name="category" value="venue"><span class="tile brick"><svg class="pi"><use href="#pi-venue"/></svg></span><span><strong>Mon lieu culturel</strong></span></label>
+        <label class="type-card"><input type="radio" name="category" value="street" checked><svg class="type-illu big-pi" aria-hidden="true"><use href="#pi-box"/></svg><span><strong>Bibliothèque de rue</strong></span></label>
+        <label class="type-card venue"><input type="radio" name="category" value="venue"><svg class="type-illu big-pi" aria-hidden="true"><use href="#pi-venue"/></svg><span><strong>Mon lieu culturel</strong></span></label>
       </fieldset>
       <label class="field"><span>Nom *</span><input name="name" required maxlength="120" placeholder="ex. Boîte du square Saint-Jean"></label>
       <label class="field"><span>Adresse ou repère</span><input name="address" maxlength="200"></label>
       <label class="field"><span>Description</span><textarea name="description" rows="2" maxlength="1000" placeholder="Forme, couleur, accès…"></textarea></label>
       <label class="field"><span>Horaires (si le lieu ferme)</span><input name="hours" maxlength="200" placeholder="ex. Mar–sam 10 h–19 h"></label>
-      <div class="row coords">
-        <label class="field grow"><span>Latitude</span><input name="lat" inputmode="decimal" required></label>
-        <label class="field grow"><span>Longitude</span><input name="lon" inputmode="decimal" required></label>
-      </div>
+      <details class="coords-details">
+        <summary class="small">Coordonnées précises</summary>
+        <div class="row coords">
+          <label class="field grow"><span>Latitude</span><input name="lat" inputmode="decimal" required></label>
+          <label class="field grow"><span>Longitude</span><input name="lon" inputmode="decimal" required></label>
+        </div>
+      </details>
       <p id="boxform-msg" class="msg" role="status"></p>
-      <button class="primary" type="submit"><svg class="pi"><use href="#pi-star"/></svg>Enregistrer</button>
+      <button class="pill solid xl" type="submit"><svg class="pi"><use href="#pi-check"/></svg>Enregistrer</button>
     </form>
   </dialog>
 

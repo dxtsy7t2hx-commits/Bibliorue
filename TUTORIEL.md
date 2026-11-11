@@ -125,7 +125,7 @@ Ouvrez-la. Si un bandeau rouge « Bibliorue n'est pas encore relié à Supabase 
 
 ## Étape 7 : votre compte, puis devenir modérateur
 
-1. Sur le site, touchez **Connexion**, puis **Créer un compte**. Choisissez **Particulier**, ou **Lieu culturel** si vous représentez un lieu.
+1. Sur le site, touchez le **rond de compte** en haut à droite, puis **Créer un compte**. Suivez les 3 étapes : **Particulier** ou **Lieu culturel**, votre nom, puis votre e-mail et votre mot de passe.
 2. Dans Supabase, retournez dans **SQL Editor**, puis **New query**. Collez la ligne suivante en mettant **votre** e-mail, puis **Run** :
    ```sql
    select public.make_admin('votre.adresse@exemple.fr');
@@ -140,10 +140,10 @@ Ouvrez-la. Si un bandeau rouge « Bibliorue n'est pas encore relié à Supabase 
 Dans Safari, sur le site, touchez le bouton **Partager**, puis **Sur l'écran d'accueil**. Bibliorue s'ouvre ensuite en plein écran, comme une application.
 
 **Premiers essais :**
-- placer une boîte (bouton **Ajouter une boîte**, puis toucher la carte) ;
+- placer une boîte : bouton rond **+**, déplacez la carte pour mettre le repère sur la boîte, puis **C'est ici** ;
 - déposer un livre ;
 - lancer une **Balade** ;
-- utiliser le bouton **Boîtes OSM** pour importer les boîtes déjà recensées par OpenStreetMap dans votre ville.
+- utiliser la pastille **Boîtes OSM** pour importer les boîtes déjà recensées par OpenStreetMap dans votre ville.
 
 ---
 

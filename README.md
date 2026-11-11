@@ -56,31 +56,21 @@ Ce problème est **NP-difficile** : aucune méthode connue ne garantit la meille
 
 Les temps sont d'abord estimés à vol d'oiseau, avec une marche à 4,5 km/h, un facteur de détour de 1,3 et 5 min par arrêt. L'itinéraire réel dans les rues est ensuite demandé au moteur **OSRM** (Luxen & Vetter, 2011), sur le serveur public de l'association FOSSGIS. Le code est dans `js/route.js`.
 
-### Direction artistique
-L'interface s'inspire de l'**estampe** : tampon encreur et **linogravure** (gravure en relief taillée à la gouge dans du linoléum, puis encrée et pressée sur le papier).
+### Direction artistique et interface
+**Palette restreinte** : bleu cobalt `#1f46c6` pour les bibliothèques de rue, rouge brique `#b0472c` pour les lieux culturels, papier `#efe7d8`, encre bleu nuit `#18204a`. Elle est déclinée en thème sombre.
 
-**Principes visuels**
-- **Aplats de couleur** aux contours **vectoriels nets** : un effet « bord irrégulier » a été essayé puis retiré, car il rendait les petits pictogrammes brouillons. Seule la grande icône de l'application le conserve.
-- **Grain de papier** discret en arrière-plan.
-- **Palette restreinte** :
+**Typographie « affiche »** : **Lilita One** (Montoreano, 2011), en capitales et en très grand corps pour les titres ; **Nunito** (Nunito Project Authors, 2014) pour le texte. Les deux polices sont hébergées dans l'application (SIL OFL 1.1).
 
-| Couleur | Code | Rôle |
-|---|---|---|
-| Bleu cobalt | `#1f4fa8` | Bibliothèques de rue, actions principales |
-| Rouge brique | `#a4432b` | Lieux culturels, ornements |
-| Papier beige | `#ebe3d3` | Fond de l'application |
-| Encre bleu nuit | `#1d2345` | Texte |
+**Pictogrammes** dessinés pour le projet, en aplats aux contours vectoriels nets. Ils servent aussi d'éléments graphiques, en grand, dans les blocs de couleur. Il n'y a ni étoiles ni illustrations dessinées.
 
-- **Fond de carte OpenStreetMap « réimprimé »** : désaturé et réchauffé pour s'accorder à la palette.
-- **Thème sombre** : la même palette est déclinée sur fond bleu nuit.
-
-**Pictogrammes.** Ils ont été dessinés pour Bibliorue, en aplats avec des réserves (les zones laissées en blanc, comme la gouge creuse le linoléum). Ils représentent : boîte à livres, lieu culturel, livre ouvert, pile de livres, pas de promeneur, étoiles, lune, etc. L'**étoile à huit branches** sert de motif de liaison : logo, puces des titres, rangées de trois tampons qui séparent les sections.
-
-**Typographie**
-- **Lilita One** (Montoreano, 2011) pour les titres : des capitales grasses et arrondies, à l'allure de caractères frappés.
-- **Nunito** (Nunito Project Authors, 2014) pour le texte : une linéale à terminaisons rondes, chaleureuse et très lisible.
-
-Les deux polices sont sous licence SIL Open Font License 1.1 et sont **hébergées dans l'application** (dossier `fonts/`). Il n'y a donc aucun appel à Google Fonts : c'est plus respectueux de la vie privée et cela fonctionne hors ligne.
+**Principes d'interface** (tendances 2026 : actions dans le tiers inférieur de l'écran, gestes, micro-interactions, typographie surdimensionnée) :
+- **carte plein écran**, avec une **feuille coulissante** : on la tire vers le haut ou on la replie. Elle contient des **cartes colorées à faire glisser** latéralement ;
+- **filtres** en pastilles (Rue, Lieux culturels, Avec des livres, Boîtes OSM) et boutons flottants à portée de pouce ;
+- **placement d'une boîte par repère fixe** : on déplace la carte sous le repère, plus précis au doigt qu'un toucher ;
+- **fiche plein écran** avec un grand en-tête coloré et une **étagère de livres à faire défiler**. Quand un livre n'a pas de couverture, l'application en compose une ;
+- **balade et inscription en étapes numérotées** (01, 02, 03), avec des choix sous forme de grosses pastilles ;
+- **accueil en trois écrans à faire glisser** à la première visite ;
+- **dégradés granuleux** sur les blocs bleus et brique, **apparition au défilement** (*scroll-driven animations*) et **transitions entre pages** (*View Transitions*) quand le navigateur les gère. Ces animations sont désactivées si l'utilisateur a demandé moins d'animations dans son système.
 
 ---
 
