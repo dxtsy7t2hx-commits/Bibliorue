@@ -287,13 +287,29 @@ $('#btn-osm').addEventListener('click', (e) => {
   if (state.showOsm) loadOsm(); else renderMarkers();
 });
 
-// ---------- Feuille coulissante (tirer la poignée, ou toucher la flèche) ----------
+// ---------- Feuille coulissante : trois états (mini / peek / open) ----------
+// Téléphone : on tire la poignée (haut = agrandir, bas = réduire jusqu'à la simple barre de titre).
+// Grand écran : panneau latéral, replié en pastille d'un toucher. Le choix est mémorisé.
 const sheet = $('#sheet');
-function setSheet(s) {
+const wide = matchMedia('(min-width: 900px)');
+function setSheet(s, remember = true) {
+  if (wide.matches && s === 'peek') s = 'open';
   sheet.dataset.state = s;
-  $('#sheet-toggle').setAttribute('aria-label', s === 'open' ? 'Réduire la liste' : 'Agrandir la liste');
+  $('#view-map').dataset.sheet = s;
+  const label = wide.matches
+    ? (s === 'mini' ? 'Déplier la liste' : 'Replier la liste')
+    : (s === 'open' ? 'Réduire la liste' : 'Agrandir la liste');
+  $('#sheet-toggle').setAttribute('aria-label', label);
+  if (remember) storage.set(wide.matches ? 'bibliorue:panel' : 'bibliorue:sheet', s);
 }
-$('#sheet-toggle').addEventListener('click', () => setSheet(sheet.dataset.state === 'open' ? 'peek' : 'open'));
+function sheetUp() { setSheet(sheet.dataset.state === 'mini' ? (wide.matches ? 'open' : 'peek') : 'open'); }
+function sheetDown() { setSheet(sheet.dataset.state === 'open' && !wide.matches ? 'peek' : 'mini'); }
+$('#sheet-toggle').addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (wide.matches) setSheet(sheet.dataset.state === 'mini' ? 'open' : 'mini');
+  else setSheet(sheet.dataset.state === 'open' ? 'peek' : 'open');
+});
+$('.sheet-head').addEventListener('click', () => { if (sheet.dataset.state === 'mini') sheetUp(); });
 {
   let startY = null;
   const grip = $('#sheet-grip');
@@ -302,17 +318,24 @@ $('#sheet-toggle').addEventListener('click', () => setSheet(sheet.dataset.state 
     if (startY == null) return;
     const dy = e.clientY - startY;
     startY = null;
-    if (Math.abs(dy) < 8) return setSheet(sheet.dataset.state === 'open' ? 'peek' : 'open');
-    setSheet(dy < 0 ? 'open' : 'peek');
+    if (Math.abs(dy) < 8) return sheet.dataset.state === 'open' ? setSheet('peek') : sheetUp();
+    if (dy < 0) sheetUp(); else sheetDown();
   });
 }
+function initSheet() {
+  const saved = storage.get(wide.matches ? 'bibliorue:panel' : 'bibliorue:sheet');
+  setSheet(['mini', 'peek', 'open'].includes(saved) ? saved : (wide.matches ? 'open' : 'peek'), false);
+}
+wide.addEventListener('change', initSheet);
+initSheet();
 
 // ---------- Placer une boîte : repère fixe au centre, on déplace la carte ----------
 function setPicking(on) {
   state.picking = on;
   document.body.classList.toggle('picking', on);
   $('#pick-ui').hidden = !on;
-  if (on) { closeDialogs(); setSheet('peek'); if (map.getZoom() < 16) map.setZoom(Math.max(map.getZoom(), 16)); }
+  if (on) { closeDialogs(); setSheet('mini', false); if (map.getZoom() < 16) map.setZoom(Math.max(map.getZoom(), 16)); }
+  else initSheet();
 }
 $('#btn-add-box').addEventListener('click', () => {
   if (!requireLogin('ajouter une boîte')) return;
@@ -563,6 +586,13 @@ function stopScan() {
 $('#btn-scan').addEventListener('click', () => (scanStream ? stopScan() : startScan()));
 
 // ---------- Balade ----------
+function stopWalk(silent = false) {
+  walkLayer.clearLayers();
+  $('#walk-result').innerHTML = '';
+  $('#walk-banner').hidden = true;
+  if (!silent) toast('Balade arrêtée.');
+}
+$('#btn-stop-walk').addEventListener('click', () => stopWalk());
 function stepMarker(n, color) {
   return L.divIcon({ className: '', html: `<span class="marker-num" style="background:${color}">${n}</span>`, iconSize: [32, 32], iconAnchor: [16, 16] });
 }
@@ -593,7 +623,7 @@ $('#walk-form').addEventListener('submit', async (e) => {
     const candidates = boxes.filter((b) => (f.venues.checked || b.category !== 'venue') && (!f.withBooks.checked || b.bookCount > 0 || b.category === 'venue'));
     const plan = planWalk(start, candidates, { budgetMin, loop: f.loop.checked });
 
-    walkLayer.clearLayers();
+    stopWalk(true);
     if (!plan.stops.length) {
       out.innerHTML = `<div class="shelf-empty">${pi('walk')}<p>Aucune boîte accessible en ${fmtMin(budgetMin)} depuis ce point (${candidates.length} dans la zone). Essayez plus de temps, un autre départ… ou ajoutez les boîtes que vous connaissez !</p></div>`;
       return;
@@ -636,10 +666,14 @@ $('#walk-form').addEventListener('submit', async (e) => {
         <button type="button" class="pill solid" id="btn-walk-map">${pi('box')}Voir sur la carte</button>
         <a class="pill" target="_blank" rel="noopener" href="${esc(navigationUrl(start, plan.stops, f.loop.checked))}">${pi('nav')}Appli GPS</a>
       </div>
+      <button type="button" class="pill xl walk-stop" id="btn-stop-walk-2">${pi('close')}Arrêter cette balade</button>
       <p class="small">Itinéraire calculé avec OSRM sur les données OpenStreetMap. Vérifiez les horaires des lieux culturels.</p>`;
+    $('#btn-stop-walk-2').onclick = () => stopWalk();
+    $('#walk-banner-text').textContent = `Balade : ${n} étape${n > 1 ? 's' : ''} · ${formatDistance(distM)}`;
+    $('#walk-banner').hidden = false;
     $('#btn-walk-map').onclick = () => {
       showView('view-map');
-      setSheet('peek');
+      setSheet('mini', false);
       setTimeout(() => map.fitBounds(L.latLngBounds(pts.map((p) => [p.lat, p.lon])).pad(0.25)), 80);
     };
     renderMarkers();
