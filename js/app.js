@@ -6,7 +6,10 @@ import { distanceMeters, formatDistance, isValidCoord } from './geo.js';
 import { planWalk, fetchWalkingRoute, navigationUrl } from './route.js';
 
 const DEFAULT_VIEW = { lat: 46.6, lon: 2.4, zoom: 6 }; // France métropolitaine
-const COLORS = { street: '#7a3e1d', venue: '#6b3fa0', osm: '#8a8f98', me: '#1a73e8' };
+// Palette « tampon » (identique à css/style.css)
+const COLORS = { street: '#1f4fa8', venue: '#a4432b', osm: '#1f4fa8', me: '#1f4fa8', paper: '#f5efe3', ink: '#1d2345' };
+const pi = (name, cls = '') => `<svg class="pi ${cls}" aria-hidden="true"><use href="#pi-${name}"/></svg>`;
+const tile = (name, cls = '') => `<span class="tile ${cls}">${pi(name)}</span>`;
 const VENUE_LABEL = {
   bibliotheque: 'Bibliothèque', mediatheque: 'Médiathèque', librairie: 'Librairie', cafe: 'Café-livres',
   association: 'Association', centre_culturel: 'Centre culturel', ecole: 'École / université', autre: 'Lieu culturel',
@@ -75,24 +78,36 @@ const osmLayer = L.layerGroup().addTo(map);
 const walkLayer = L.layerGroup().addTo(map);
 let meMarker = null;
 
-function pinIcon(color, glyph = 'book') {
-  const inner = glyph === 'venue'
-    ? '<path d="M8 12l7-4 7 4v1H8zM9 14h2v5H9zm5 0h2v5h-2zm5 0h2v5h-2zM8 19.5h14V21H8z" fill="#fff"/>'
-    : '<rect x="9" y="8" width="12" height="11" rx="1.5" fill="#fff"/><path d="M15 9v9" stroke="' + color + '" stroke-width="1.5"/>';
+// Marqueurs : petits « tampons » carrés aux bords irréguliers, pictogramme en réserve.
+function stampIcon({ fill, glyph, glyphColor, outline = false, size = 36 }) {
+  const r = Math.round(size * 0.28);
+  const g = Math.round(size * 0.62);
+  const off = (size - g) / 2;
   return L.divIcon({
-    className: '',
-    html: `<svg width="30" height="38" viewBox="0 0 30 38" aria-hidden="true"><path d="M15 37C15 37 2 22 2 14a13 13 0 0 1 26 0c0 8-13 23-13 23z" fill="${color}" stroke="#fff" stroke-width="2"/>${inner}</svg>`,
-    iconSize: [30, 38], iconAnchor: [15, 37], popupAnchor: [0, -32],
+    className: 'marker',
+    html: `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" aria-hidden="true">
+      <rect x="2" y="2" width="${size - 4}" height="${size - 4}" rx="${r}" fill="${fill}" ${outline ? `stroke="${COLORS.osm}" stroke-width="2.5" stroke-dasharray="5 3"` : ''} filter="url(#rough)"/>
+      <use href="#pi-${glyph}" x="${off}" y="${off - 1}" width="${g}" height="${g}" style="color:${glyphColor}"/></svg>`,
+    iconSize: [size, size], iconAnchor: [size / 2, size / 2], popupAnchor: [0, -size / 2],
   });
 }
-const ICONS = { street: pinIcon(COLORS.street), venue: pinIcon(COLORS.venue, 'venue'), osm: pinIcon(COLORS.osm) };
+const ICONS = {
+  street: stampIcon({ fill: COLORS.street, glyph: 'box', glyphColor: COLORS.paper }),
+  venue: stampIcon({ fill: COLORS.venue, glyph: 'venue', glyphColor: COLORS.paper, size: 40 }),
+  osm: stampIcon({ fill: COLORS.paper, glyph: 'box', glyphColor: COLORS.osm, outline: true, size: 32 }),
+  me: L.divIcon({
+    className: 'marker',
+    html: `<svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="14" fill="${COLORS.me}" stroke="${COLORS.paper}" stroke-width="3"/><use href="#pi-sparkle" x="8" y="8" width="18" height="18" style="color:${COLORS.paper}"/></svg>`,
+    iconSize: [34, 34], iconAnchor: [17, 17],
+  }),
+};
 
 function popupFor(box) {
   const div = document.createElement('div');
   const sub = box.category === 'venue'
     ? `${esc(VENUE_LABEL[box.createdBy?.venueKind] ?? 'Lieu culturel')}`
     : `${box.bookCount} livre(s) signalé(s)`;
-  div.innerHTML = `<strong>${esc(box.name)}</strong><br><small>${sub}</small><br>`;
+  div.innerHTML = `<strong>${esc(box.name)}</strong><br><span class="meta">${sub}</span><br>`;
   const btn = document.createElement('button');
   btn.className = 'small primary';
   btn.textContent = 'Ouvrir la fiche';
@@ -114,7 +129,7 @@ function renderMarkers() {
     if (known.has(o.osmId)) continue;
     L.marker([o.lat, o.lon], { icon: ICONS.osm, title: o.name, opacity: 0.85 }).bindPopup(() => {
       const div = document.createElement('div');
-      div.innerHTML = `<strong>${esc(o.name)}</strong><br><small>Recensée dans OpenStreetMap.<br>Pas encore sur Bibliorue.</small><br>`;
+      div.innerHTML = `<strong>${esc(o.name)}</strong><br><span class="meta">Recensée dans OpenStreetMap,<br>pas encore sur Bibliorue.</span><br>`;
       const btn = document.createElement('button');
       btn.className = 'small primary';
       btn.textContent = 'L\'ajouter à Bibliorue';
@@ -140,15 +155,15 @@ function renderBoxList() {
     .sort((a, b) => a.distance - b.distance).slice(0, 20);
   const ul = $('#box-list');
   if (!list.length) {
-    ul.innerHTML = `<li class="empty">Aucune boîte dans cette zone pour l'instant. Soyez le premier à en ajouter une, ou affichez les « Boîtes OSM à importer ».</li>`;
+    ul.innerHTML = `<li class="empty">${pi('moon')}Aucune boîte par ici pour l'instant. Ajoutez celles que vous connaissez, ou affichez les « Boîtes OSM ».</li>`;
     return;
   }
   ul.innerHTML = list.map((b) => `
     <li><button class="card" data-box="${b.id}" type="button">
+      ${b.category === 'venue' ? tile('venue', 'brick') : tile('box')}
       <span class="grow"><strong>${esc(b.name)}</strong>
         <span class="meta">${b.category === 'venue' ? esc(VENUE_LABEL[b.createdBy?.venueKind] ?? 'Lieu culturel') : `${b.bookCount} livre(s)`}${b.address ? ' · ' + esc(b.address) : ''}</span></span>
-      <span class="badge ${b.category}">${b.category === 'venue' ? 'Lieu culturel' : 'Rue'}</span>
-      <span class="meta">${formatDistance(b.distance)}</span>
+      <span class="dist">${formatDistance(b.distance)}</span>
     </button></li>`).join('');
 }
 for (const sel of ['#box-list', '#search-results']) {
@@ -182,7 +197,7 @@ function locate() {
     navigator.geolocation.getCurrentPosition((p) => {
       state.userPos = { lat: p.coords.latitude, lon: p.coords.longitude };
       if (meMarker) meMarker.remove();
-      meMarker = L.circleMarker([state.userPos.lat, state.userPos.lon], { radius: 8, color: '#fff', weight: 2, fillColor: COLORS.me, fillOpacity: 1 })
+      meMarker = L.marker([state.userPos.lat, state.userPos.lon], { icon: ICONS.me, zIndexOffset: 2000, keyboard: false })
         .addTo(map).bindTooltip('Vous êtes ici');
       resolve(state.userPos);
     }, (err) => reject(new Error(err.message)), { enableHighAccuracy: true, timeout: 10000 });
@@ -285,13 +300,13 @@ $('#boxform').addEventListener('submit', async (e) => {
 
 // ---------- Fiche boîte ----------
 function bookHtml(b) {
-  const cover = b.coverUrl ? `<img src="${esc(b.coverUrl)}" alt="" loading="lazy">` : `<span class="nocover" aria-hidden="true">📕</span>`;
+  const cover = b.coverUrl ? `<img src="${esc(b.coverUrl)}" alt="" loading="lazy">` : `<span class="nocover">${pi('book')}</span>`;
   const info = [b.authors, b.year, b.publisher].filter(Boolean).map(esc).join(' · ');
   const when = b.status === 'taken' ? `emprunté le ${fmtDate(b.changedAt)}` : `signalé le ${fmtDate(b.changedAt)}${b.addedBy ? ` par ${esc(b.addedBy.displayName)}` : ''}`;
   const actions = b.status === 'available'
     ? `<button class="small" data-act="take" data-id="${b.id}" type="button">Je le prends</button>
        <button class="small" data-act="gone" data-id="${b.id}" type="button" title="Le livre n'est plus dans la boîte">N'y est plus</button>
-       <button class="small" data-act="report-book" data-id="${b.id}" type="button" title="Contenu inapproprié">⚑</button>`
+       <button class="small ghost" data-act="report-book" data-id="${b.id}" type="button" title="Signaler un contenu inapproprié" aria-label="Signaler">${pi('flag')}</button>`
     : `<button class="small" data-act="return" data-id="${b.id}" type="button">Je le redépose ici</button>`;
   return `<div class="book ${b.status}">${cover}<div class="grow"><strong>${esc(b.title)}</strong>
     <div class="meta">${info}</div>${b.note ? `<div class="meta">« ${esc(b.note)} »</div>` : ''}
@@ -300,7 +315,7 @@ function bookHtml(b) {
 }
 
 function renderBox({ box, books }) {
-  $('#box-title').textContent = box.name;
+  $('#box-title').innerHTML = `${box.category === 'venue' ? tile('venue', 'brick') : tile('box')}<span>${esc(box.name)}</span>`;
   const available = books.filter((b) => b.status === 'available');
   const taken = books.filter((b) => b.status === 'taken');
   const dist = state.userPos ? distanceMeters(state.userPos, box) : null;
@@ -309,23 +324,26 @@ function renderBox({ box, books }) {
   const c = box.createdBy;
   const creator = !c ? 'Ajoutée par un ancien membre'
     : c.accountType === 'culture'
-      ? `<span class="creator venue">Ajoutée par <strong>🏛️ ${esc(c.displayName)}</strong> (${esc(VENUE_LABEL[c.venueKind] ?? 'lieu culturel')})${c.website ? ` · <a href="${esc(c.website)}" target="_blank" rel="noopener nofollow">site web</a>` : ''}</span>`
+      ? `<span class="creator venue">Ajoutée par <strong>${esc(c.displayName)}</strong> (${esc(VENUE_LABEL[c.venueKind] ?? 'lieu culturel')})${c.website ? ` · <a href="${esc(c.website)}" target="_blank" rel="noopener nofollow">site web</a>` : ''}</span>`
       : `Ajoutée par <strong>${esc(c.displayName)}</strong>`;
   $('#box-body').innerHTML = `
-    <p class="meta"><span class="badge ${box.category}">${box.category === 'venue' ? 'Lieu culturel' : 'Bibliothèque de rue'}</span>
-      ${esc(box.address)} ${dist != null ? `· à ${formatDistance(dist)}` : ''}</p>
-    <p class="creator">${creator} · ${fmtDate(box.createdAt)}</p>
+    <div class="box-head"><span class="badge ${box.category}">${box.category === 'venue' ? 'Lieu culturel' : 'Bibliothèque de rue'}</span>
+      ${dist != null ? `<span class="dist">à ${formatDistance(dist)}</span>` : ''}</div>
+    <div class="facts">
+      ${box.address ? `<div>${pi('locate')}${esc(box.address)}</div>` : ''}
+      ${box.hours ? `<div>${pi('clock')}${esc(box.hours)}</div>` : ''}
+    </div>
     ${box.description ? `<p>${esc(box.description)}</p>` : ''}
-    ${box.hours ? `<p>🕒 ${esc(box.hours)}</p>` : ''}
+    <p class="creator">${creator} · ${fmtDate(box.createdAt)}</p>
     <div class="row">
-      <a class="button" href="${route}" target="_blank" rel="noopener">🚶 Y aller</a>
-      ${box.osmId ? `<a class="button" href="https://www.openstreetmap.org/${esc(box.osmId)}" target="_blank" rel="noopener">OSM</a>` : ''}
-      ${mine ? '<button class="small" data-act="edit" type="button">Modifier</button><button class="small danger" data-act="delete" type="button">Supprimer</button>' : ''}
-      <button class="small" data-act="report-box" type="button">⚑ Signaler</button>
+      <a class="button primary" href="${route}" target="_blank" rel="noopener">${pi('nav')}Y aller</a>
+      ${box.osmId ? `<a class="button small" href="https://www.openstreetmap.org/${esc(box.osmId)}" target="_blank" rel="noopener">OSM</a>` : ''}
+      ${mine ? `<button class="small" data-act="edit" type="button">${pi('pencil')}Modifier</button><button class="small danger" data-act="delete" type="button">${pi('trash')}Supprimer</button>` : ''}
+      <button class="small ghost" data-act="report-box" type="button">${pi('flag')}Signaler</button>
     </div>
     <h3>Livres signalés (${available.length})</h3>
-    ${available.length ? available.map(bookHtml).join('') : '<p class="empty">Aucun livre signalé pour l\'instant.</p>'}
-    ${taken.length ? `<details class="panel"><summary>Récemment empruntés (${taken.length})</summary>${taken.map(bookHtml).join('')}</details>` : ''}`;
+    ${available.length ? available.map(bookHtml).join('') : `<p class="empty">${pi('moon')}Aucun livre signalé pour l'instant.</p>`}
+    ${taken.length ? `<details class="panel"><summary>${pi('books')}Récemment empruntés (${taken.length})</summary>${taken.map(bookHtml).join('')}</details>` : ''}`;
 }
 
 async function openBox(id) {
@@ -360,7 +378,7 @@ $('#box-body').addEventListener('click', async (e) => {
     switch (t.dataset.act) {
       case 'take':
         if (!requireLogin('indiquer que vous prenez un livre')) return;
-        await api.takeBook(id); toast('Bonne lecture ! 📖'); break;
+        await api.takeBook(id); toast('Bonne lecture !'); break;
       case 'return':
         if (!requireLogin('redéposer un livre')) return;
         await api.returnBook(id, box.id); toast('Merci pour le dépôt !'); break;
@@ -459,7 +477,7 @@ $('#btn-scan').addEventListener('click', () => (scanStream ? stopScan() : startS
 
 // ---------- Balade ----------
 function stepMarker(n, color) {
-  return L.divIcon({ className: '', html: `<span class="marker-num" style="background:${color}">${n}</span>`, iconSize: [24, 24], iconAnchor: [12, 12] });
+  return L.divIcon({ className: '', html: `<span class="marker-num" style="background:${color}">${n}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] });
 }
 
 $('#walk-form').addEventListener('submit', async (e) => {
@@ -490,7 +508,7 @@ $('#walk-form').addEventListener('submit', async (e) => {
 
     walkLayer.clearLayers();
     if (!plan.stops.length) {
-      out.innerHTML = `<p class="empty">Aucune boîte accessible en ${fmtMin(budgetMin)} depuis ce point (${candidates.length} candidate(s) dans la zone). Essayez plus de temps, un autre départ… ou ajoutez les boîtes que vous connaissez !</p>`;
+      out.innerHTML = `<p class="empty">${pi('moon')}Aucune boîte accessible en ${fmtMin(budgetMin)} depuis ce point (${candidates.length} candidate(s) dans la zone). Essayez plus de temps, un autre départ… ou ajoutez les boîtes que vous connaissez !</p>`;
       return;
     }
 
@@ -498,8 +516,8 @@ $('#walk-form').addEventListener('submit', async (e) => {
     const pts = [start, ...plan.stops, ...(f.loop.checked ? [start] : [])];
     let real = null;
     try { real = await fetchWalkingRoute(pts); } catch { /* repli sur l'estimation */ }
-    L.polyline(real?.latlngs ?? pts.map((p) => [p.lat, p.lon]), { color: COLORS.me, weight: 5, opacity: 0.75, dashArray: real ? null : '6 8' }).addTo(walkLayer);
-    L.circleMarker([start.lat, start.lon], { radius: 9, color: '#fff', weight: 2, fillColor: COLORS.me, fillOpacity: 1 }).bindTooltip('Départ').addTo(walkLayer);
+    L.polyline(real?.latlngs ?? pts.map((p) => [p.lat, p.lon]), { color: COLORS.venue, weight: 4, opacity: 0.9, dashArray: real ? '1 9' : '6 8', lineCap: 'round' }).addTo(walkLayer);
+    L.marker([start.lat, start.lon], { icon: ICONS.me, zIndexOffset: 1500 }).bindTooltip('Départ').addTo(walkLayer);
     plan.stops.forEach((s, i) => L.marker([s.lat, s.lon], { icon: stepMarker(i + 1, COLORS[s.category]), zIndexOffset: 1000 })
       .bindTooltip(`${i + 1}. ${esc(s.name)}`).on('click', () => openBox(s.id)).addTo(walkLayer));
 
@@ -509,21 +527,21 @@ $('#walk-form').addEventListener('submit', async (e) => {
     const venues = plan.stops.filter((s) => s.category === 'venue').length;
     out.innerHTML = `
       <div class="walk-summary">
-        <div class="stat"><b>${plan.stops.length}</b>étape(s)${venues ? ` dont ${venues} lieu(x) culturel(s)` : ''}</div>
+        <div class="stat${venues ? ' venue' : ''}"><b>${plan.stops.length}</b>étape(s)${venues ? ` dont ${venues} lieu(x) culturel(s)` : ''}</div>
         <div class="stat"><b>${formatDistance(distM)}</b>à pied</div>
         <div class="stat"><b>${fmtMin(totalMin)}</b>avec 5 min par arrêt</div>
       </div>
       ${real ? '' : '<p class="small">Tracé réel indisponible : distances estimées à vol d\'oiseau × 1,3.</p>'}
-      ${totalMin > budgetMin * 1.15 ? '<p class="small">⚠️ Le trajet réel dépasse un peu le temps prévu (détours du réseau piéton).</p>' : ''}
+      ${totalMin > budgetMin * 1.15 ? '<p class="small">Attention : le trajet réel dépasse un peu le temps prévu (détours du réseau piéton).</p>' : ''}
       <ol class="walk-steps">
-        <li class="start"><span class="grow"><strong>Départ</strong></span></li>
-        ${plan.stops.map((s) => `<li class="${s.category}"><button class="card" type="button" data-box="${s.id}">
-          <span class="grow"><strong>${esc(s.name)}</strong><span class="meta">${s.category === 'venue' ? esc(VENUE_LABEL[s.createdBy?.venueKind] ?? 'Lieu culturel') : `${s.bookCount} livre(s)`}${s.hours ? ' · 🕒 ' + esc(s.hours) : ''}</span></span></button></li>`).join('')}
-        ${f.loop.checked ? '<li class="end"><span class="grow"><strong>Retour au départ</strong></span></li>' : ''}
+        <li><span class="step start">${pi('sparkle')}</span><strong class="display">Départ</strong></li>
+        ${plan.stops.map((s, i) => `<li><span class="step ${s.category}">${i + 1}</span><button class="card" type="button" data-box="${s.id}">
+          <span class="grow"><strong>${esc(s.name)}</strong><span class="meta">${s.category === 'venue' ? esc(VENUE_LABEL[s.createdBy?.venueKind] ?? 'Lieu culturel') : `${s.bookCount} livre(s)`}${s.hours ? ' · ' + esc(s.hours) : ''}</span></span></button></li>`).join('')}
+        ${f.loop.checked ? `<li><span class="step start">${pi('sparkle')}</span><strong class="display">Retour au départ</strong></li>` : ''}
       </ol>
       <div class="row" style="margin-top:12px">
-        <button type="button" class="primary" id="btn-walk-map">🗺️ Voir sur la carte</button>
-        <a class="button" target="_blank" rel="noopener" href="${esc(navigationUrl(start, plan.stops, f.loop.checked))}">📱 Ouvrir dans une appli GPS</a>
+        <button type="button" class="primary" id="btn-walk-map">${pi('box')}Voir sur la carte</button>
+        <a class="button" target="_blank" rel="noopener" href="${esc(navigationUrl(start, plan.stops, f.loop.checked))}">${pi('nav')}Ouvrir dans une appli GPS</a>
       </div>
       <p class="small">Itinéraire calculé avec OSRM sur les données OpenStreetMap. Vérifiez les horaires des lieux culturels.</p>`;
     $('#btn-walk-map').onclick = () => {
@@ -547,16 +565,17 @@ $('#search-input').addEventListener('input', () => {
   searchTimer = setTimeout(async () => {
     const q = $('#search-input').value.trim();
     const ul = $('#search-results');
-    if (q.length < 2) { ul.innerHTML = '<li class="empty">Tapez au moins 2 caractères.</li>'; return; }
+    if (q.length < 2) { ul.innerHTML = `<li class="empty">${pi('search')}Tapez au moins 2 caractères.</li>`; return; }
     try {
       const { results } = await api.search(q);
       const ref = referencePoint();
       results.sort((a, b) => distanceMeters(ref, a.box) - distanceMeters(ref, b.box));
       ul.innerHTML = results.length ? results.map((b) => `<li><button class="card" data-box="${b.box.id}" type="button">
+        ${b.coverUrl ? `<img src="${esc(b.coverUrl)}" alt="" loading="lazy" style="width:42px;height:60px;object-fit:cover;border-radius:6px">` : tile('book', b.box.category === 'venue' ? 'brick' : '')}
         <span class="grow"><strong>${esc(b.title)}</strong>
         <span class="meta">${esc(b.authors)} — dans « ${esc(b.box.name)} »</span></span>
-        <span class="meta">${formatDistance(distanceMeters(ref, b.box))}</span></button></li>`).join('')
-        : '<li class="empty">Ce livre n\'est signalé dans aucune boîte pour le moment.</li>';
+        <span class="dist">${formatDistance(distanceMeters(ref, b.box))}</span></button></li>`).join('')
+        : `<li class="empty">${pi('moon')}Ce livre n'est signalé dans aucune boîte pour le moment.</li>`;
     } catch (err) { ul.innerHTML = `<li class="msg error">${esc(errMsg(err))}</li>`; }
   }, 250);
 });
@@ -568,14 +587,14 @@ async function renderCommunity() {
     const { stats, events } = await api.activity();
     $('#stats').innerHTML = `
       <div class="stat"><b>${stats.street}</b>bibliothèques de rue</div>
-      <div class="stat"><b style="color:var(--venue)">${stats.venues}</b>lieux culturels</div>
+      <div class="stat venue"><b>${stats.venues}</b>lieux culturels</div>
       <div class="stat"><b>${stats.books}</b>livres signalés</div>
       <div class="stat"><b>${stats.members}</b>membres</div>`;
     $('#events').innerHTML = events.length ? events.map((e) => {
-      const who = e.user ? `<strong${e.user.accountType === 'culture' ? ' style="color:var(--venue)"' : ''}>${esc(e.user.displayName)}</strong>` : 'Quelqu\'un';
+      const who = e.user ? `<strong${e.user.accountType === 'culture' ? ' style="color:var(--brick)"' : ''}>${esc(e.user.displayName)}</strong>` : 'Quelqu\'un';
       const what = e.type.startsWith('box') ? `la boîte « ${esc(e.title)} »` : `« ${esc(e.title)} »${e.boxName ? ` — ${esc(e.boxName)}` : ''}`;
       return `<li><time datetime="${esc(e.at)}">${new Date(e.at).toLocaleString('fr-FR')}</time>${who} ${EVENT_LABEL[e.type] ?? esc(e.type)} ${what}</li>`;
-    }).join('') : '<li class="empty">Pas encore de contributions. Lancez-vous !</li>';
+    }).join('') : `<li class="empty">${pi('sparkle')}Pas encore de contributions. Lancez-vous !</li>`;
   } catch (err) { $('#events').innerHTML = `<li class="msg error">${esc(errMsg(err))}</li>`; }
 }
 
@@ -596,7 +615,8 @@ regForm.addEventListener('change', () => {
 
 function updateHeader() {
   const b = $('#btn-account');
-  b.textContent = state.me ? (state.me.accountType === 'culture' ? `🏛️ ${state.me.displayName}` : `👤 ${state.me.displayName}`) : 'Se connecter';
+  const culture = state.me?.accountType === 'culture';
+  b.innerHTML = `${tile(culture ? 'venue' : 'user')}<span class="label">${state.me ? esc(state.me.displayName) : 'Connexion'}</span>`;
   b.classList.toggle('venue', state.me?.accountType === 'culture');
 }
 
@@ -637,8 +657,8 @@ async function renderAccount() {
     state.me = user;
     $('#me-name').textContent = user.displayName;
     $('#me-type').innerHTML = user.accountType === 'culture'
-      ? `<span class="badge venue">🏛️ ${esc(VENUE_LABEL[user.venueKind] ?? 'Lieu culturel')}</span> ${user.website ? `<a href="${esc(user.website)}" target="_blank" rel="noopener">${esc(user.website)}</a>` : ''}`
-      : '<span class="badge street">👤 Particulier</span>';
+      ? `<span class="badge venue">${pi('venue')}${esc(VENUE_LABEL[user.venueKind] ?? 'Lieu culturel')}</span> ${user.website ? `<a href="${esc(user.website)}" target="_blank" rel="noopener">${esc(user.website)}</a>` : ''}`
+      : `<span class="badge street">${pi('user')}Particulier</span>`;
     $('#me-type').innerHTML += ` <span class="small">· ${esc(user.email)} · membre depuis le ${fmtDate(user.createdAt)}</span>`;
     $('#me-stats').innerHTML = `<div class="stat"><b>${contributions.boxes}</b>boîte(s) ajoutée(s)</div><div class="stat"><b>${contributions.books}</b>livre(s) signalé(s)</div>`;
     $('#me-venue-cta').hidden = user.accountType !== 'culture';
@@ -688,6 +708,13 @@ $('#reports').addEventListener('click', async (e) => {
   if (!t) return;
   if (t.dataset.openBox) openBox(Number(t.dataset.openBox));
   if (t.dataset.resolve) { await api.resolveReport(t.dataset.resolve).catch((err) => toast(errMsg(err))); renderReports(); }
+});
+
+// ---------- Bandeau d'accueil (masquable, mémorisé sur l'appareil) ----------
+try { if (localStorage.getItem('bibliorue:intro') === 'hidden') $('#intro').hidden = true; } catch { /* stockage indisponible */ }
+$('#btn-intro-close').addEventListener('click', () => {
+  $('#intro').hidden = true;
+  try { localStorage.setItem('bibliorue:intro', 'hidden'); } catch { /* ignore */ }
 });
 
 // ---------- Démarrage ----------

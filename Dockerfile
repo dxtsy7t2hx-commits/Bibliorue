@@ -6,6 +6,7 @@ COPY server ./server
 COPY js ./js
 COPY css ./css
 COPY icons ./icons
+COPY fonts ./fonts
 COPY index.html sw.js manifest.webmanifest ./
 ENV NODE_ENV=production PORT=8080 DATABASE_PATH=/data/bibliorue.db TRUST_PROXY=1
 VOLUME ["/data"]

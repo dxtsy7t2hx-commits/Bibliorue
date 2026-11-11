@@ -1,9 +1,11 @@
 // Service worker : interface disponible hors ligne et dernière carte consultée en secours.
-const CACHE = 'bibliorue-v2.0.0';
+const CACHE = 'bibliorue-v2.1.0';
 const SHELL = [
   './', 'index.html', 'css/style.css', 'manifest.webmanifest',
   'js/app.js', 'js/api.js', 'js/geo.js', 'js/isbn.js', 'js/overpass.js', 'js/openlibrary.js', 'js/route.js',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
+  'fonts/lilita-one-latin-400-normal.woff2', 'fonts/lilita-one-latin-ext-400-normal.woff2',
+  'fonts/nunito-latin-wght-normal.woff2', 'fonts/nunito-latin-ext-wght-normal.woff2', 'fonts/nunito-latin-wght-italic.woff2',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
 ];

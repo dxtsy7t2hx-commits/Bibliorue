@@ -2,7 +2,7 @@
 
 **Bibliorue** est une **carte communautaire des bibliothèques de rue**. Tout le monde peut la consulter. Les membres inscrits y ajoutent les boîtes qu'ils connaissent et les livres qu'ils y voient. L'application **propose aussi des balades** qui vont de boîte en boîte, selon le temps dont on dispose.
 
-Les **lieux culturels** (bibliothèques, médiathèques, librairies, cafés-livres, associations…) peuvent s'inscrire comme tels. Ils apparaissent alors **en violet** sur la carte, et les promeneurs peuvent les inclure dans leur balade.
+Les **lieux culturels** (bibliothèques, médiathèques, librairies, cafés-livres, associations…) peuvent s'inscrire comme tels. Ils apparaissent alors **en rouge brique** sur la carte, et les promeneurs peuvent les inclure dans leur balade.
 
 ---
 
@@ -33,9 +33,9 @@ Bibliorue se branche aussi sur OpenStreetMap : les boîtes déjà recensées y a
 
 | | |
 |---|---|
-| 🗺️ **Carte partagée** | Visible sans compte. Code couleur : 🟤 bibliothèque de rue · 🟣 lieu culturel · ⚪ boîte recensée dans OSM mais pas encore sur Bibliorue · 🔵 vous. |
+| 🗺️ **Carte partagée** | Visible sans compte. Code couleur : tampon bleu : bibliothèque de rue · tampon rouge brique : lieu culturel · tampon beige à bord pointillé : boîte recensée dans OSM mais pas encore sur Bibliorue · rond bleu étoilé : vous. |
 | 👤 **Comptes** | Obligatoires pour ajouter une boîte ou un livre, indiquer qu'on prend un livre, ou signaler un contenu. Deux types d'inscription : **Particulier** ou **Lieu culturel** (avec le type de lieu et un site web). |
-| 🏛️ **Lieux culturels** | Seul un compte « lieu culturel » peut placer un lieu violet. La règle est vérifiée par le serveur, pas seulement par l'interface. Sa fiche affiche le type de lieu, ses horaires et son site. |
+| 🏛️ **Lieux culturels** | Seul un compte « lieu culturel » peut placer un lieu rouge brique. La règle est vérifiée par le serveur, pas seulement par l'interface. Sa fiche affiche le type de lieu, ses horaires et son site. |
 | ➕ **Ajout de boîte** | On touche la carte à l'emplacement exact de la boîte. Le serveur **refuse les doublons** : une autre boîte à moins de 15 m, ou le même identifiant OSM. |
 | 📚 **Livres** | Dépôt, avec fiche remplie automatiquement à partir de l'ISBN via Open Library, ou par scan du code-barres. Puis « Je le prends », « Je le redépose ici », « N'y est plus ». |
 | 🚶 **Balade** | On choisit son temps disponible (30 min à 4 h), une boucle ou un aller simple, et si l'on inclut les lieux culturels. Bibliorue choisit les étapes, les ordonne et trace l'itinéraire piéton réel. La balade s'ouvre ensuite dans une application GPS. |
@@ -55,6 +55,32 @@ Ce problème est **NP-difficile** : aucune méthode connue ne garantit la meille
 3. **Nouvel essai d'insertion** avec le temps ainsi libéré.
 
 Les temps sont d'abord estimés à vol d'oiseau, avec une marche à 4,5 km/h, un facteur de détour de 1,3 et 5 min par arrêt. L'itinéraire réel dans les rues est ensuite demandé au moteur **OSRM** (Luxen & Vetter, 2011), sur le serveur public de l'association FOSSGIS. Le code est dans `js/route.js`.
+
+### Direction artistique
+L'interface s'inspire de l'**estampe** : tampon encreur et **linogravure** (gravure en relief taillée à la gouge dans du linoléum, puis encrée et pressée sur le papier).
+
+**Principes visuels**
+- **Aplats de couleur** et **bords légèrement irréguliers**. Ce relief est obtenu par un filtre SVG de déplacement (`feTurbulence` + `feDisplacementMap`), qui imite le léger flou d'une impression à la main.
+- **Grain de papier** discret en arrière-plan.
+- **Palette restreinte** :
+
+| Couleur | Code | Rôle |
+|---|---|---|
+| Bleu cobalt | `#1f4fa8` | Bibliothèques de rue, actions principales |
+| Rouge brique | `#a4432b` | Lieux culturels, ornements |
+| Papier beige | `#ebe3d3` | Fond de l'application |
+| Encre bleu nuit | `#1d2345` | Texte |
+
+- **Fond de carte OpenStreetMap « réimprimé »** : désaturé et réchauffé pour s'accorder à la palette.
+- **Thème sombre** : la même palette est déclinée sur fond bleu nuit.
+
+**Pictogrammes.** Ils ont été dessinés pour Bibliorue, en aplats avec des réserves (les zones laissées en blanc, comme la gouge creuse le linoléum). Ils représentent : boîte à livres, lieu culturel, livre ouvert, pile de livres, pas de promeneur, étoiles, lune, etc. L'**étoile à huit branches** sert de motif de liaison : logo, puces des titres, rangées de trois tampons qui séparent les sections.
+
+**Typographie**
+- **Lilita One** (Montoreano, 2011) pour les titres : des capitales grasses et arrondies, à l'allure de caractères frappés.
+- **Nunito** (Nunito Project Authors, 2014) pour le texte : une linéale à terminaisons rondes, chaleureuse et très lisible.
+
+Les deux polices sont sous licence SIL Open Font License 1.1 et sont **hébergées dans l'application** (dossier `fonts/`). Il n'y a donc aucun appel à Google Fonts : c'est plus respectueux de la vie privée et cela fonctionne hors ligne.
 
 ---
 
@@ -99,7 +125,8 @@ server/index.js     démarrage du serveur HTTP
 server/app.js       API REST + service des fichiers de l'interface
 server/auth.js      mots de passe (scrypt), sessions, limitation de débit
 server/db.js        schéma SQLite (users, sessions, boxes, books, events, reports)
-index.html, css/    interface (mobile d'abord, thème sombre automatique)
+index.html, css/    interface (mobile d'abord, thème sombre automatique, pictogrammes SVG intégrés)
+fonts/              polices Lilita One et Nunito (woff2) + licences OFL
 js/app.js           logique de l'interface (carte Leaflet, fiches, balade, compte)
 js/api.js           client de l'API
 js/route.js         conseiller de balade + itinéraire OSRM
@@ -146,9 +173,13 @@ Internet Archive. (s.d.). *Open Library Books API*. Consulté le 11 novembre 202
 
 Little Free Library. (s.d.). *History*. Consulté le 11 novembre 2026, à l'adresse https://littlefreelibrary.org/history/
 
+Montoreano, J. (2011). *Lilita One* [Police de caractères, SIL Open Font License 1.1]. Google Fonts. https://fonts.google.com/specimen/Lilita+One
+
 Luxen, D., & Vetter, C. (2011). Real-time routing with OpenStreetMap data. In *Proceedings of the 19th ACM SIGSPATIAL International Conference on Advances in Geographic Information Systems* (pp. 513–516). ACM. https://doi.org/10.1145/2093973.2094062
 
 Moritz, H. (2000). Geodetic Reference System 1980. *Journal of Geodesy, 74*(1), 128–133. https://doi.org/10.1007/s001900050278
+
+Nunito Project Authors. (2014). *Nunito* [Police de caractères, SIL Open Font License 1.1]. Google Fonts. https://fonts.google.com/specimen/Nunito
 
 OpenStreetMap Foundation. (s.d.). *Tile usage policy*. Consulté le 11 novembre 2026, à l'adresse https://operations.osmfoundation.org/policies/tiles/
 

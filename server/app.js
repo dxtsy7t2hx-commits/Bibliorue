@@ -18,15 +18,16 @@ const bad = (msg) => new HttpError(400, msg);
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.svg': 'image/svg+xml',
-  '.png': 'image/png', '.ico': 'image/x-icon', '.txt': 'text/plain; charset=utf-8',
+  '.png': 'image/png', '.woff2': 'font/woff2', '.ico': 'image/x-icon', '.txt': 'text/plain; charset=utf-8',
 };
-const PUBLIC_FILES = /^\/(index\.html|sw\.js|manifest\.webmanifest|(css|js|icons)\/[\w.-]+)$/;
+const PUBLIC_FILES = /^\/(index\.html|sw\.js|manifest\.webmanifest|(css|js|icons|fonts)\/[\w.-]+)$/;
 
 const CSP = [
   "default-src 'self'",
   "script-src 'self' https://unpkg.com",
   "style-src 'self' 'unsafe-inline' https://unpkg.com",
   "img-src 'self' data: https:",
+  "font-src 'self'",
   "connect-src 'self' https://overpass-api.de https://overpass.private.coffee https://overpass.kumi.systems https://openlibrary.org https://routing.openstreetmap.de https://unpkg.com",
   "frame-ancestors 'none'", "base-uri 'self'", "form-action 'self'",
 ].join('; ');
@@ -375,7 +376,7 @@ export function createApp({ db, staticDir, adminEmails = [], trustProxy = false 
       const ext = extname(file);
       res.writeHead(200, {
         'Content-Type': MIME[ext] ?? 'application/octet-stream',
-        'Cache-Control': ext === '.html' || pathname === '/sw.js' ? 'no-cache' : 'public, max-age=3600',
+        'Cache-Control': ext === '.html' || pathname === '/sw.js' ? 'no-cache' : ext === '.woff2' ? 'public, max-age=31536000, immutable' : 'public, max-age=3600',
         ...(ext === '.html' ? { 'Content-Security-Policy': CSP } : {}),
       });
       res.end(req.method === 'HEAD' ? undefined : await readFile(file));
