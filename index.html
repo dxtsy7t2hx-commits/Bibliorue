@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Bibliorue</title>
+  <meta name="description" content="Trouver les boîtes à livres près de chez soi et savoir quels livres s'y trouvent.">
+  <meta name="theme-color" content="#7a3e1d">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1><img src="icons/icon.svg" alt="" width="28" height="28"> Bibliorue</h1>
+    <p class="tagline">Les boîtes à livres de votre quartier</p>
+  </header>
+
+  <main>
+    <!-- CARTE -->
+    <section id="view-map" class="view active" aria-label="Carte">
+      <div class="map-tools">
+        <button id="btn-locate" type="button">📍 Me localiser</button>
+        <button id="btn-osm" type="button">🔄 Boîtes OpenStreetMap de la zone</button>
+        <button id="btn-add-box" type="button" class="primary">＋ Ajouter une boîte</button>
+      </div>
+      <p id="map-hint" class="hint" hidden>Touchez la carte à l'emplacement de la boîte.</p>
+      <div id="map" role="application" aria-label="Carte des boîtes à livres"></div>
+      <h2 class="list-title">Boîtes les plus proches</h2>
+      <ul id="box-list" class="cards"></ul>
+    </section>
+
+    <!-- RECHERCHE -->
+    <section id="view-search" class="view" aria-label="Rechercher un livre">
+      <h2>Rechercher un livre</h2>
+      <label class="field">
+        <span>Titre, auteur ou ISBN</span>
+        <input id="search-input" type="search" autocomplete="off" placeholder="ex. Victor Hugo">
+      </label>
+      <label class="check"><input id="search-taken" type="checkbox"> Inclure les livres déjà empruntés</label>
+      <ul id="search-results" class="cards"></ul>
+    </section>
+
+    <!-- ACTIVITÉ -->
+    <section id="view-activity" class="view" aria-label="Activité">
+      <h2>Activité</h2>
+      <div id="stats" class="stats"></div>
+      <ul id="events" class="events"></ul>
+    </section>
+
+    <!-- À PROPOS -->
+    <section id="view-about" class="view" aria-label="À propos">
+      <h2>À propos de Bibliorue</h2>
+      <p>Une <strong>boîte à livres</strong> (on parle aussi de <em>bibliothèque de rue</em>, d'« armoire à livres » ou, en anglais, de <em>Little Free Library</em>) est un meuble installé dans l'espace public. Chacun peut y déposer ou y prendre des livres gratuitement, sans inscription. Bibliorue sert à les trouver et à savoir quels livres on y a vus.</p>
+      <h3>D'où viennent les données ?</h3>
+      <ul>
+        <li><strong>Boîtes « OSM »</strong> : lues en direct dans OpenStreetMap (étiquette <code>amenity=public_bookcase</code>) via l'API Overpass. © contributeurs OpenStreetMap, licence ODbL.</li>
+        <li><strong>Boîtes « perso »</strong> : celles que vous ajoutez vous-même.</li>
+        <li><strong>Fiches livres</strong> : saisies par vous, ou complétées automatiquement à partir de l'ISBN via l'API d'Open Library (Internet Archive).</li>
+      </ul>
+      <p>Tout est enregistré <strong>sur cet appareil uniquement</strong>. Pour sauvegarder ou partager, exportez un fichier.</p>
+      <h3>Sauvegarde</h3>
+      <div class="row">
+        <button id="btn-export" type="button">⬇️ Exporter (JSON)</button>
+        <label class="button">⬆️ Importer<input id="file-import" type="file" accept="application/json,.json" hidden></label>
+        <button id="btn-reset" type="button" class="danger">Tout effacer</button>
+      </div>
+      <p class="small">Version <span id="app-version"></span></p>
+    </section>
+  </main>
+
+  <nav class="tabbar" aria-label="Navigation principale">
+    <button data-view="view-map" class="active" type="button"><span aria-hidden="true">🗺️</span>Carte</button>
+    <button data-view="view-search" type="button"><span aria-hidden="true">🔎</span>Livres</button>
+    <button data-view="view-activity" type="button"><span aria-hidden="true">📜</span>Activité</button>
+    <button data-view="view-about" type="button"><span aria-hidden="true">ℹ️</span>À propos</button>
+  </nav>
+
+  <!-- Fiche d'une boîte -->
+  <dialog id="box-dialog">
+    <form method="dialog" class="dialog-head">
+      <h2 id="box-title"></h2>
+      <button class="close" aria-label="Fermer">✕</button>
+    </form>
+    <div id="box-body"></div>
+
+    <details id="add-book" class="panel">
+      <summary>＋ Déposer un livre dans cette boîte</summary>
+      <form id="book-form" autocomplete="off">
+        <div class="isbn-row">
+          <label class="field grow"><span>ISBN (au dos, sous le code-barres)</span>
+            <input name="isbn" inputmode="numeric" placeholder="978…"></label>
+          <button type="button" id="btn-isbn">Compléter</button>
+          <button type="button" id="btn-scan" hidden>📷 Scanner</button>
+        </div>
+        <video id="scan-video" playsinline muted hidden></video>
+        <label class="field"><span>Titre *</span><input name="title" required></label>
+        <label class="field"><span>Auteur(s)</span><input name="authors"></label>
+        <div class="row">
+          <label class="field grow"><span>Année</span><input name="year"></label>
+          <label class="field grow"><span>Éditeur</span><input name="publisher"></label>
+        </div>
+        <label class="field"><span>Remarque (état, genre…)</span><input name="note"></label>
+        <input type="hidden" name="coverUrl">
+        <p id="book-msg" class="msg" role="status"></p>
+        <button class="primary" type="submit">Enregistrer le dépôt</button>
+      </form>
+    </details>
+  </dialog>
+
+  <!-- Ajout / modification d'une boîte -->
+  <dialog id="boxform-dialog">
+    <form method="dialog" class="dialog-head">
+      <h2 id="boxform-title">Nouvelle boîte à livres</h2>
+      <button class="close" aria-label="Fermer">✕</button>
+    </form>
+    <form id="boxform">
+      <input type="hidden" name="id">
+      <label class="field"><span>Nom *</span><input name="name" required placeholder="ex. Boîte du square"></label>
+      <label class="field"><span>Adresse ou repère</span><input name="address"></label>
+      <label class="field"><span>Description</span><textarea name="description" rows="2"></textarea></label>
+      <div class="row coords">
+        <label class="field grow"><span>Latitude</span><input name="lat" inputmode="decimal" required></label>
+        <label class="field grow"><span>Longitude</span><input name="lon" inputmode="decimal" required></label>
+      </div>
+      <p id="boxform-msg" class="msg" role="status"></p>
+      <button class="primary" type="submit">Enregistrer</button>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

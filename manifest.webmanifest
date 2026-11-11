@@ -1,0 +1,16 @@
+{
+  "name": "Bibliorue — boîtes à livres",
+  "short_name": "Bibliorue",
+  "description": "Trouver les boîtes à livres près de chez soi et savoir quels livres s'y trouvent.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#faf6ef",
+  "theme_color": "#7a3e1d",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
