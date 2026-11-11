@@ -11,6 +11,22 @@ Ce guide s'adresse à quelqu'un qui n'a **jamais lancé d'application web**. Il 
 
 ---
 
+## Vous êtes sur iPad (ou sans ordinateur) ?
+
+L'iPad ne permet pas d'installer Node.js ni d'ouvrir un vrai terminal : **sautez l'étape A**. Tout le reste se fait dans Safari, car GitHub et Railway sont des sites web.
+
+1. **Étape 0** sur github.com : fusionnez la branche dans `main`. Ce sont des boutons, aucune commande.
+2. **Étape B** sur railway.com : mettez Bibliorue en ligne. L'offre gratuite suffit pour essayer, et l'adresse obtenue sert alors de version de test.
+
+Adaptations pour l'écran tactile :
+- **Pour ajouter le volume (B.4)** : il n'y a pas de clic droit. Utilisez le bouton de création du canevas (**+ Create** ou **+ New**, en haut), puis choisissez **Volume**. Le raccourci `Cmd + K` marche aussi si un clavier est branché.
+- **Pour ouvrir un menu (⋮, Redeploy…)** : touchez l'icône ; un appui long fait office de clic droit.
+- **Pour installer l'application une fois en ligne** : dans Safari, bouton Partager, puis **Sur l'écran d'accueil**.
+
+> La seule chose impossible sur iPad, c'est de faire tourner Bibliorue *en local*. Une version en ligne sur Railway la remplace très bien pour vos essais. Les éventuelles erreurs se lisent dans **Deployments**, puis **View logs**.
+
+---
+
 ## Petit lexique
 
 - **Terminal** : fenêtre où l'on tape des commandes au lieu de cliquer. Sur Mac, l'application s'appelle *Terminal* ; sur Windows, *Terminal* ou *PowerShell*.
